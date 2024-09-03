@@ -1,0 +1,110 @@
+site_name: 操作系统2023秋 | 哈工大（深圳）
+copyright: 'Copyright &copy; 2023 - 2024 哈尔滨工业大学（深圳）'
+repo_name: 'HITSZ-OS-Course'
+
+theme:
+    language: 'zh' # 配置语言
+    name: material
+    highlightjs: true
+    hljs_languages:
+        - yaml
+        - rust
+    features:
+        - navigation.tabs # 横向导航
+        - navigation.top # 返回顶部的按钮，在上滑时出现
+        - navigation.tabs.sticky # 导航选项卡将锁定在标题下方，并在向下滚动时始终保持可见
+        - navigation.tracking # 在url中使用标题定位锚点
+    icon:
+      logo: fontawesome/brands/linux
+      repo: fontawesome/brands/git-alt        
+
+markdown_extensions:
+  - admonition # 提示块
+  - codehilite: # 代码高亮，显示行号
+      guess_lang: false
+      linenums: true
+  - toc: # 锚点
+      permalink: true # 固定标题位置为当前位置
+  - footnotes # 脚注
+  - meta  # 支持markdown文件上方自定义标题标签等
+  - pymdownx.betterem: # 对加粗和斜体更好的检测
+      smart_enable: all
+  - pymdownx.caret # 下划线上标
+  - pymdownx.critic # 增加删除修改高亮注释，可修饰行内或段落
+  - pymdownx.details  # 提示块可折叠
+  - pymdownx.emoji: # 表情
+      emoji_index: !!python/name:pymdownx.emoji.twemoji
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.inlinehilite # 行内代码高亮
+  - pymdownx.magiclink # 自动识别超链接
+  - pymdownx.mark # 文本高亮
+  - pymdownx.smartsymbols # 符号转换
+  - pymdownx.superfences # 代码块高亮
+  - def_list # 列表
+  - pymdownx.tasklist: # 复选框checklist
+      custom_checkbox: true
+  - pymdownx.tabbed
+  - pymdownx.tilde # 删除线下标
+  - attr_list
+  - md_in_html  
+  - mdx_math:
+      enable_dollar_delimiter: True
+
+extra_css:
+  - stylesheets/extra.css
+    
+extra_javascript:
+    - 'js/baidu-tongji.js'
+
+extra:
+    social:
+        -   icon: fontawesome/solid/paper-plane
+            link: mailto:<xiawen@hit.edu.cn>
+            name: xiawen@hit.edu.cn
+
+nav:
+  - 实验概述: 
+    - 实验须知: index.md
+    - 实验平台以及环境配置: env.md
+    - 实验实用工具: tools.md
+    - Linux开发环境基础知识: Linux.md
+    - 远程实验平台使用指南: remote_env.md
+    - VSCode图形化调试指南(一): remote_env_gdb.md
+    - VSCode图形化调试指南(二)——系统调用: remote_env_gdb2.md    
+  - 常见问题:
+    - 2022/2023: 
+        - 实验环境问题: faq/faq-env.md
+        - Lab1问题: faq/lab1.md
+        - Lab2问题: faq/lab2.md
+        - Lab3问题: faq/lab3.md
+        - Lab4问题: faq/lab4.md
+  - Lab1：XV6与Unix实用程序: 
+    - 实验概述: lab1/part1.md
+    - 实验原理: lab1/part2.md
+    - 实验步骤: lab1/part3.md
+    - 提交文档: lab1/part4.md  
+  - Lab2：进程与系统调用: 
+    - 实验概述: lab2/part1.md
+    - 实验原理: lab2/part2.md
+    - 实验实现: lab2/part3.md
+    - 提交文档: lab2/part4.md   
+  - Lab3：锁机制的应用: 
+    - 实验概述: lab3/part1.md
+    - 实验原理: lab3/part2.md
+    - 实验实现: lab3/part3.md
+    - xv-6中Lock的实现（选读）: lab3/part4.md  
+    - 提交文档: lab3/part5.md   
+  - Lab4：页表: 
+    - 实验概述: lab4/part1.md
+    - 实验原理: lab4/part2.md
+    - 实验实现: lab4/part3.md
+    - 提交文档: lab4/part4.md  
+  - Lab5：基于FUSE的青春版EXT2文件系统: 
+    - 实验概述: lab5/part1.md
+    - 实验原理: lab5/part2.md
+    - 实验实现: lab5/part3.md
+    - 提交文档: lab5/part4.md
+    - 常见问题（补充）: lab5/part5.md
+    - 选择阅读（补充）: lab5/part6.md
+  - OS竞赛招新: 
+    - 2024年“全国大学生计算机系统能力大赛操作系统设计赛”火热报名中！: oscomp/oscomp.md   
