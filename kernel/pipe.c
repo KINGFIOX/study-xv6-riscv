@@ -74,7 +74,7 @@ void pipeclose(struct pipe* pi, int writable)
 int pipewrite(struct pipe* pi, uint64 addr, int n)
 {
     int i = 0;
-    struct proc* pr = myproc();
+    struct proc* pr = my_proc();
 
     acquire(&pi->lock);
     while (i < n) {
@@ -102,7 +102,7 @@ int pipewrite(struct pipe* pi, uint64 addr, int n)
 int piperead(struct pipe* pi, uint64 addr, int n)
 {
     int i;
-    struct proc* pr = myproc();
+    struct proc* pr = my_proc();
     char ch;
 
     acquire(&pi->lock);

@@ -10,7 +10,7 @@
 // Fetch the uint64 at addr from the current process.
 int fetchaddr(uint64 addr, uint64* ip)
 {
-    struct proc* p = myproc();
+    struct proc* p = my_proc();
     if (addr >= p->sz || addr + sizeof(uint64) > p->sz) // both tests needed, in case of overflow
         return -1;
     if (copyin(p->pagetable, (char*)ip, addr, sizeof(*ip)) != 0)
@@ -22,7 +22,7 @@ int fetchaddr(uint64 addr, uint64* ip)
 // Returns length of string, not including nul, or -1 for error.
 int fetchstr(uint64 addr, char* buf, int max)
 {
-    struct proc* p = myproc();
+    struct proc* p = my_proc();
     if (copyinstr(p->pagetable, buf, addr, max) < 0)
         return -1;
     return strlen(buf);
@@ -31,7 +31,7 @@ int fetchstr(uint64 addr, char* buf, int max)
 static uint64
 argraw(int n)
 {
-    struct proc* p = myproc();
+    struct proc* p = my_proc();
     switch (n) {
     case 0:
         return p->trap_frame->a0;
@@ -126,7 +126,7 @@ static uint64 (*syscalls[])(void) = {
 void syscall(void)
 {
     int num;
-    struct proc* p = myproc();
+    struct proc* p = my_proc();
 
     num = p->trap_frame->a7;
     if (num > 0 && num < NELEM(syscalls) && syscalls[num]) {

@@ -42,7 +42,7 @@ void usertrap(void)
     // since we're now in the kernel.
     w_stvec((uint64)kernelvec);
 
-    struct proc* p = myproc();
+    struct proc* p = my_proc();
 
     // save user program counter.
     p->trap_frame->epc = r_sepc();
@@ -85,7 +85,7 @@ void usertrap(void)
 //
 void usertrapret(void)
 {
-    struct proc* p = myproc();
+    struct proc* p = my_proc();
 
     // we're about to switch the destination of traps from
     // kerneltrap() to usertrap(), so turn off interrupts until
@@ -146,7 +146,7 @@ void kerneltrap()
     }
 
     // give up the CPU if this is a timer interrupt.
-    if (which_dev == 2 && myproc() != 0)
+    if (which_dev == 2 && my_proc() != 0)
         yield();
 
     // the yield() may have caused some traps to occur,

@@ -28,7 +28,7 @@ int exec(char* path, char** argv)
     struct inode* ip;
     struct proghdr ph;
     pagetable_t pagetable = 0, oldpagetable;
-    struct proc* p = myproc();
+    struct proc* p = my_proc();
 
     begin_op();
 
@@ -71,7 +71,7 @@ int exec(char* path, char** argv)
     end_op();
     ip = 0;
 
-    p = myproc();
+    p = my_proc();
     uint64 oldsz = p->sz;
 
     // Allocate some pages at the next page boundary.

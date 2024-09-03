@@ -162,9 +162,11 @@ void uart_putc_sync(int c)
     }
 
     // wait for Transmit Holding Empty to be set in LSR.
+    // LSR 的 LSR_TX_IDLE = 0 的时候, 陷入循环
     while ((ReadReg(LSR) & LSR_TX_IDLE) == 0)
         ;
-    WriteReg(THR, c);
+
+    WriteReg(THR, c); // transmit 字符
 
     pop_off();
 }

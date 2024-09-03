@@ -37,7 +37,7 @@ void acquire(struct spinlock* lk)
     __sync_synchronize();
 
     // Record info about lock acquisition for holding() and debugging.
-    lk->cpu = mycpu();
+    lk->cpu = my_cpu();
 }
 
 // Release the lock.
@@ -73,7 +73,7 @@ void release(struct spinlock* lk)
 int holding(struct spinlock* lk)
 {
     int r;
-    r = (lk->locked && lk->cpu == mycpu());
+    r = (lk->locked && lk->cpu == my_cpu());
     return r;
 }
 
@@ -86,19 +86,23 @@ void push_off(void)
     int old = intr_get();
 
     intr_off();
-    if (mycpu()->n_off == 0)
-        mycpu()->int_ena = old;
-    mycpu()->n_off += 1;
+    if (my_cpu()->n_off == 0) {
+        my_cpu()->int_ena = old;
+    }
+    my_cpu()->n_off += 1; // 增加嵌套计数器
 }
 
 void pop_off(void)
 {
-    struct cpu* c = mycpu();
-    if (intr_get())
+    struct cpu* c = my_cpu();
+    if (intr_get()) {
         panic("pop_off - interruptible");
-    if (c->n_off < 1)
+    }
+    if (c->n_off < 1) {
         panic("pop_off");
+    }
     c->n_off -= 1;
-    if (c->n_off == 0 && c->int_ena)
+    if (c->n_off == 0 && c->int_ena) {
         intr_on();
+    }
 }

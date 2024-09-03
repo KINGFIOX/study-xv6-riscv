@@ -48,8 +48,7 @@ w_mepc(uint64 x)
 #define SSTATUS_SIE (1L << 1) // Supervisor Interrupt Enable
 #define SSTATUS_UIE (1L << 0) // User Interrupt Enable
 
-static inline uint64
-r_sstatus()
+static inline uint64 r_sstatus()
 {
     uint64 x;
     asm volatile("csrr %0, sstatus" : "=r"(x));
@@ -287,16 +286,21 @@ intr_on()
     w_sstatus(r_sstatus() | SSTATUS_SIE);
 }
 
-// disable device interrupts
-static inline void
-intr_off()
+/**
+ * @brief 关中断
+ *
+ */
+static inline void intr_off()
 {
     w_sstatus(r_sstatus() & ~SSTATUS_SIE);
 }
 
-// are device interrupts enabled?
-static inline int
-intr_get()
+/**
+ * @brief are device interrupts enabled?
+ *
+ * @return int
+ */
+static inline int intr_get()
 {
     uint64 x = r_sstatus();
     return (x & SSTATUS_SIE) != 0;

@@ -67,7 +67,7 @@ int cpu_id()
 
 // Return this CPU's cpu struct.
 // Interrupts must be disabled.
-struct cpu* mycpu(void)
+struct cpu* my_cpu(void)
 {
     int id = cpu_id();
     struct cpu* c = &cpus[id];
@@ -75,17 +75,16 @@ struct cpu* mycpu(void)
 }
 
 // Return the current struct proc *, or zero if none.
-struct proc*
-myproc(void)
+struct proc* my_proc(void)
 {
     push_off();
-    struct cpu* c = mycpu();
+    struct cpu* c = my_cpu();
     struct proc* p = c->proc;
     pop_off();
     return p;
 }
 
-int allocpid()
+int alloc_pid()
 {
     int pid;
 
@@ -117,7 +116,7 @@ allocproc(void)
     return 0;
 
 found:
-    p->pid = allocpid();
+    p->pid = alloc_pid();
     p->state = USED;
 
     // Allocate a trap_frame page.
@@ -254,7 +253,7 @@ void userinit(void)
 int growproc(int n)
 {
     uint64 sz;
-    struct proc* p = myproc();
+    struct proc* p = my_proc();
 
     sz = p->sz;
     if (n > 0) {
@@ -274,7 +273,7 @@ int fork(void)
 {
     int i, pid;
     struct proc* np;
-    struct proc* p = myproc();
+    struct proc* p = my_proc();
 
     // Allocate process.
     if ((np = allocproc()) == 0) {
@@ -337,7 +336,7 @@ void reparent(struct proc* p)
 // until its parent calls wait().
 void exit(int status)
 {
-    struct proc* p = myproc();
+    struct proc* p = my_proc();
 
     if (p == initproc)
         panic("init exiting");
@@ -382,7 +381,7 @@ int wait(uint64 addr)
 {
     struct proc* pp;
     int havekids, pid;
-    struct proc* p = myproc();
+    struct proc* p = my_proc();
 
     acquire(&wait_lock);
 
@@ -433,7 +432,7 @@ int wait(uint64 addr)
 void scheduler(void)
 {
     struct proc* p;
-    struct cpu* c = mycpu();
+    struct cpu* c = my_cpu();
 
     c->proc = 0;
     for (;;) {
@@ -478,26 +477,26 @@ void scheduler(void)
 void sched(void)
 {
     int int_ena;
-    struct proc* p = myproc();
+    struct proc* p = my_proc();
 
     if (!holding(&p->lock))
         panic("sched p->lock");
-    if (mycpu()->n_off != 1)
+    if (my_cpu()->n_off != 1)
         panic("sched locks");
     if (p->state == RUNNING)
         panic("sched running");
     if (intr_get())
         panic("sched interruptible");
 
-    int_ena = mycpu()->int_ena;
-    swtch(&p->context, &mycpu()->context);
-    mycpu()->int_ena = int_ena;
+    int_ena = my_cpu()->int_ena;
+    swtch(&p->context, &my_cpu()->context);
+    my_cpu()->int_ena = int_ena;
 }
 
 // Give up the CPU for one scheduling round.
 void yield(void)
 {
-    struct proc* p = myproc();
+    struct proc* p = my_proc();
     acquire(&p->lock);
     p->state = RUNNABLE;
     sched();
@@ -511,7 +510,7 @@ void forkret(void)
     static int first = 1;
 
     // Still holding p->lock from scheduler.
-    release(&myproc()->lock);
+    release(&my_proc()->lock);
 
     if (first) {
         // File system initialization must be run in the context of a
@@ -531,7 +530,7 @@ void forkret(void)
 // Reacquires lock when awakened.
 void sleep(void* chan, struct spinlock* lk)
 {
-    struct proc* p = myproc();
+    struct proc* p = my_proc();
 
     // Must acquire p->lock in order to
     // change p->state and then call sched.
@@ -564,7 +563,7 @@ void wakeup(void* chan)
     struct proc* p;
 
     for (p = proc; p < &proc[NPROC]; p++) {
-        if (p != myproc()) {
+        if (p != my_proc()) {
             acquire(&p->lock);
             if (p->state == SLEEPING && p->chan == chan) {
                 p->state = RUNNABLE;
@@ -619,7 +618,7 @@ int killed(struct proc* p)
 // Returns 0 on success, -1 on error.
 int either_copyout(int user_dst, uint64 dst, void* src, uint64 len)
 {
-    struct proc* p = myproc();
+    struct proc* p = my_proc();
     if (user_dst) {
         return copyout(p->pagetable, dst, src, len);
     } else {
@@ -633,7 +632,7 @@ int either_copyout(int user_dst, uint64 dst, void* src, uint64 len)
 // Returns 0 on success, -1 on error.
 int either_copyin(void* dst, int user_src, uint64 src, uint64 len)
 {
-    struct proc* p = myproc();
+    struct proc* p = my_proc();
     if (user_src) {
         return copyin(p->pagetable, dst, src, len);
     } else {
