@@ -195,19 +195,18 @@ int fork1(void)
 // PAGEBREAK!
 //  Constructors
 
-struct cmd* exec_cmd(void)
-{
-    struct exec_cmd* cmd;
+/* ---------- ---------- build cmd ---------- ---------- */
 
-    cmd = malloc(sizeof(*cmd));
+struct cmd* build_exec_cmd(void)
+{
+    struct exec_cmd* cmd = malloc(sizeof(*cmd));
     memset(cmd, 0, sizeof(*cmd));
     cmd->type = EXEC;
     return (struct cmd*)cmd;
 }
 
-struct cmd* redir_cmd(struct cmd* subcmd, char* file, char* efile, int mode, int fd)
+struct cmd* build_redir_cmd(struct cmd* subcmd, char* file, char* efile, int mode, int fd)
 {
-
     struct redir_cmd* cmd = malloc(sizeof(*cmd));
     memset(cmd, 0, sizeof(*cmd));
     cmd->type = REDIR;
@@ -219,11 +218,9 @@ struct cmd* redir_cmd(struct cmd* subcmd, char* file, char* efile, int mode, int
     return (struct cmd*)cmd;
 }
 
-struct cmd* pipe_cmd(struct cmd* left, struct cmd* right)
+struct cmd* build_pipe_cmd(struct cmd* left, struct cmd* right)
 {
-    struct pipe_cmd* cmd;
-
-    cmd = malloc(sizeof(*cmd));
+    struct pipe_cmd* cmd = malloc(sizeof(*cmd));
     memset(cmd, 0, sizeof(*cmd));
     cmd->type = PIPE;
     cmd->left = left;
@@ -231,11 +228,9 @@ struct cmd* pipe_cmd(struct cmd* left, struct cmd* right)
     return (struct cmd*)cmd;
 }
 
-struct cmd* list_cmd(struct cmd* left, struct cmd* right)
+struct cmd* build_list_cmd(struct cmd* left, struct cmd* right)
 {
-    struct list_cmd* cmd;
-
-    cmd = malloc(sizeof(*cmd));
+    struct list_cmd* cmd = malloc(sizeof(*cmd));
     memset(cmd, 0, sizeof(*cmd));
     cmd->type = LIST;
     cmd->left = left;
@@ -249,15 +244,16 @@ struct cmd* list_cmd(struct cmd* left, struct cmd* right)
  * @param subcmd
  * @return struct cmd*
  */
-struct cmd* back_cmd(struct cmd* subcmd)
+struct cmd* build_back_cmd(struct cmd* subcmd)
 {
-
     struct back_cmd* cmd = malloc(sizeof(*cmd));
     memset(cmd, 0, sizeof(*cmd));
     cmd->type = BACK;
     cmd->cmd = subcmd;
     return (struct cmd*)cmd;
 }
+
+/* ---------- ---------- 自动机 ---------- ---------- */
 
 // PAGE BREAK!
 //  Parsing
@@ -335,10 +331,14 @@ int peek(char** ps, char* es, char* toks)
     return *s && strchr(toks, *s);
 }
 
+/* ---------- ---------- 命令行解析 ---------- ---------- */
+
 struct cmd* parse_line(char**, char*);
 struct cmd* parse_pipe(char**, char*);
 struct cmd* parse_exec(char**, char*);
 struct cmd* nul_terminate(struct cmd*);
+
+// 这个解析, 可以搞成一个 bnf 语法
 
 struct cmd* parse_cmd(char* s)
 {
@@ -358,11 +358,11 @@ struct cmd* parse_line(char** ps, char* es)
     struct cmd* cmd = parse_pipe(ps, es); // 解析一行的时候, 要先看一下有没有 pipe
     while (peek(ps, es, "&")) {
         get_token(ps, es, 0, 0);
-        cmd = back_cmd(cmd); // <back> & <front>
+        cmd = build_back_cmd(cmd); // <back> & <front>
     }
     if (peek(ps, es, ";")) { // 根据 ';' 分成多行
         get_token(ps, es, 0, 0);
-        cmd = list_cmd(cmd, parse_line(ps, es)); // 命令链, 递归的解析
+        cmd = build_list_cmd(cmd, parse_line(ps, es)); // 命令链, 递归的解析
     }
     return cmd;
 }
@@ -371,9 +371,9 @@ struct cmd* parse_pipe(char** ps, char* es)
 {
     struct cmd* cmd = parse_exec(ps, es);
     if (peek(ps, es, "|")) {
-        get_token(ps, es, 0, 0);
+        get_token(ps, es, 0, 0); //
         // 递归的看, 是不是有多个 pipe, 链式传递
-        cmd = pipe_cmd(cmd, parse_pipe(ps, es));
+        cmd = build_pipe_cmd(cmd, parse_pipe(ps, es));
     }
     return cmd;
 }
@@ -383,17 +383,18 @@ struct cmd* parse_redirs(struct cmd* cmd, char** ps, char* es)
     while (peek(ps, es, "<>")) {
         int tok = get_token(ps, es, 0, 0);
         char *q, *eq;
-        if (get_token(ps, es, &q, &eq) != 'a')
+        if (get_token(ps, es, &q, &eq) != 'a') {
             panic("missing file for redirection");
+        }
         switch (tok) {
         case '<':
-            cmd = redir_cmd(cmd, q, eq, O_RDONLY, 0);
+            cmd = build_redir_cmd(cmd, q, eq, O_RDONLY, 0);
             break;
         case '>':
-            cmd = redir_cmd(cmd, q, eq, O_WRONLY | O_CREATE | O_TRUNC, 1);
+            cmd = build_redir_cmd(cmd, q, eq, O_WRONLY | O_CREATE | O_TRUNC, 1);
             break;
-        case '+': // >>
-            cmd = redir_cmd(cmd, q, eq, O_WRONLY | O_CREATE, 1);
+        case '+': // >>, 这个在 get_token 中规定的
+            cmd = build_redir_cmd(cmd, q, eq, O_WRONLY | O_CREATE, 1);
             break;
         }
     }
@@ -420,10 +421,10 @@ struct cmd* parse_exec(char** ps, char* es)
     if (peek(ps, es, "(")) {
         return parse_block(ps, es);
     }
-    struct cmd* ret = exec_cmd();
+    struct cmd* ret = build_exec_cmd(); // 创建一个新的 cmd
+    ret = parse_redirs(ret, ps, es);
     struct exec_cmd* cmd = (struct exec_cmd*)ret;
     int argc = 0;
-    ret = parse_redirs(ret, ps, es);
     while (!peek(ps, es, "|)&;")) {
         int tok;
         char *q, *eq;
@@ -446,7 +447,14 @@ struct cmd* parse_exec(char** ps, char* es)
     return ret;
 }
 
-// NUL-terminate all the counted strings.
+/* ---------- ---------- 命令行解析 ---------- ---------- */
+
+/**
+ * @brief 给命令行参数啥的, 加上 \0
+ *
+ * @param cmd
+ * @return struct cmd*
+ */
 struct cmd* nul_terminate(struct cmd* cmd)
 {
     if (cmd == 0) {
@@ -463,7 +471,7 @@ struct cmd* nul_terminate(struct cmd* cmd)
 
     case REDIR:
         struct redir_cmd* rcmd = (struct redir_cmd*)cmd;
-        nul_terminate(rcmd->cmd); // 重定向？
+        nul_terminate(rcmd->cmd);
         *rcmd->efile = 0;
         break;
 

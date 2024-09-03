@@ -49,11 +49,20 @@ void* memset(void* dst, int c, uint n)
     return dst;
 }
 
+/**
+ * @brief s 中的元素是否有在 c 中出现
+ *
+ * @param s 集合
+ * @param c
+ * @return char*
+ */
 char* strchr(const char* s, char c)
 {
-    for (; *s; s++)
-        if (*s == c)
+    for (; *s; s++) {
+        if (*s == c) {
             return (char*)s;
+        }
+    }
     return 0;
 }
 

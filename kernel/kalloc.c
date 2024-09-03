@@ -9,7 +9,7 @@
 #include "riscv.h"
 #include "defs.h"
 
-void freerange(void* pa_start, void* pa_end);
+void free_range(void* pa_start, void* pa_end);
 
 extern char end[]; // first address after kernel.
                    // defined by kernel.ld.
@@ -20,38 +20,39 @@ struct run {
 
 struct {
     struct spinlock lock;
-    struct run* freelist;
+    struct run* freelist; // 空闲链表
 } kmem;
 
-void kinit()
+void k_init()
 {
     init_lock(&kmem.lock, "kmem");
-    freerange(end, (void*)PHYSTOP);
+    free_range(end, (void*)PHYSTOP);
 }
 
-void freerange(void* pa_start, void* pa_end)
+void free_range(void* pa_start, void* pa_end)
 {
-    char* p;
-    p = (char*)PGROUNDUP((uint64)pa_start);
-    for (; p + PGSIZE <= (char*)pa_end; p += PGSIZE)
-        kfree(p);
+    for (char* p = (char*)PGROUNDUP((uint64)pa_start); p + PGSIZE <= (char*)pa_end; p += PGSIZE) {
+        k_free(p); // p 是 一个 page
+    }
 }
 
 // Free the page of physical memory pointed at by pa,
 // which normally should have been returned by a
-// call to kalloc().  (The exception is when
-// initializing the allocator; see kinit above.)
-void kfree(void* pa)
+// call to k_alloc().  (The exception is when
+// initializing the allocator; see k_init above.)
+void k_free(void* pa)
 {
-    struct run* r;
 
-    if (((uint64)pa % PGSIZE) != 0 || (char*)pa < end || (uint64)pa >= PHYSTOP)
-        panic("kfree");
+    if (((uint64)pa % PGSIZE) != 0 /* 对齐 ? */
+        || (char*)pa < end
+        || (uint64)pa >= PHYSTOP) {
+        panic("k_free");
+    }
 
     // Fill with junk to catch dangling refs.
     memset(pa, 1, PGSIZE);
 
-    r = (struct run*)pa;
+    struct run* r = (struct run*)pa;
 
     acquire(&kmem.lock);
     r->next = kmem.freelist;
@@ -62,17 +63,16 @@ void kfree(void* pa)
 // Allocate one 4096-byte page of physical memory.
 // Returns a pointer that the kernel can use.
 // Returns 0 if the memory cannot be allocated.
-void* kalloc(void)
+void* k_alloc(void)
 {
-    struct run* r;
-
     acquire(&kmem.lock);
-    r = kmem.freelist;
-    if (r)
+    struct run* r = kmem.freelist;
+    if (r) {
         kmem.freelist = r->next;
+    }
     release(&kmem.lock);
-
-    if (r)
+    if (r) {
         memset((char*)r, 5, PGSIZE); // fill with junk
+    }
     return (void*)r;
 }

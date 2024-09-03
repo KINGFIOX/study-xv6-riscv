@@ -405,8 +405,7 @@ sys_mknod(void)
     return 0;
 }
 
-uint64
-sys_chdir(void)
+uint64 sys_chdir(void)
 {
     char path[MAXPATH];
     struct inode* ip;
@@ -430,8 +429,7 @@ sys_chdir(void)
     return 0;
 }
 
-uint64
-sys_exec(void)
+uint64 sys_exec(void)
 {
     char path[MAXPATH], *argv[MAXARG];
     int i;
@@ -453,7 +451,7 @@ sys_exec(void)
             argv[i] = 0;
             break;
         }
-        argv[i] = kalloc();
+        argv[i] = k_alloc();
         if (argv[i] == 0)
             goto bad;
         if (fetchstr(uarg, argv[i], PGSIZE) < 0)
@@ -463,13 +461,13 @@ sys_exec(void)
     int ret = exec(path, argv);
 
     for (i = 0; i < NELEM(argv) && argv[i] != 0; i++)
-        kfree(argv[i]);
+        k_free(argv[i]);
 
     return ret;
 
 bad:
     for (i = 0; i < NELEM(argv) && argv[i] != 0; i++)
-        kfree(argv[i]);
+        k_free(argv[i]);
     return -1;
 }
 

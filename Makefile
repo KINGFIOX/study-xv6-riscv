@@ -60,7 +60,7 @@ OBJDUMP = $(TOOLPREFIX)objdump
 CFLAGS = -Wall -Werror -O -fno-omit-frame-pointer -ggdb -gdwarf-2
 CFLAGS += -MD
 CFLAGS += -mcmodel=medany
-# CFLAGS += -ffreestanding -fno-common -nostdlib -mno-relax
+CFLAGS += -ffreestanding -fno-common -nostdlib -mno-relax
 CFLAGS += -fno-common -nostdlib
 CFLAGS += -fno-builtin-strncpy -fno-builtin-strncmp -fno-builtin-strlen -fno-builtin-memset
 CFLAGS += -fno-builtin-memmove -fno-builtin-memcmp -fno-builtin-log -fno-builtin-bzero
@@ -160,11 +160,13 @@ GDBPORT = $(shell expr `id -u` % 5000 + 25000)
 QEMUGDB = $(shell if $(QEMU) -help | grep -q '^-gdb'; \
 	then echo "-gdb tcp::$(GDBPORT)"; \
 	else echo "-s -p $(GDBPORT)"; fi)
+
 ifndef CPUS
 CPUS := 3
 endif
-
-QEMUOPTS = -machine virt -bios none -kernel $K/kernel -m 128M -smp $(CPUS) -nographic
+# QEMUOPTS = -machine virt -bios none -kernel $K/kernel -m 128M -smp $(CPUS) -nographic
+# -smp, multi cpu 设置为 1, 方便调试
+QEMUOPTS = -machine virt -bios none -kernel $K/kernel -m 128M -smp 1 -nographic
 QEMUOPTS += -global virtio-mmio.force-legacy=false
 QEMUOPTS += -drive file=fs.img,if=none,format=raw,id=x0
 QEMUOPTS += -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0

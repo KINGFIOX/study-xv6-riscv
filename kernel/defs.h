@@ -59,10 +59,10 @@ void ramdiskinit(void);
 void ramdiskintr(void);
 void ramdiskrw(struct buf*);
 
-// kalloc.c
-void* kalloc(void);
-void kfree(void*);
-void kinit(void);
+// k_alloc.c
+void* k_alloc(void);
+void k_free(void*);
+void k_init(void);
 
 // log.c
 void initlog(int, struct superblock*);
@@ -86,7 +86,7 @@ int cpu_id(void);
 void exit(int);
 int fork(void);
 int growproc(int);
-void proc_mapstacks(pagetable_t);
+void proc_map_stacks(pagetable_t);
 pagetable_t proc_pagetable(struct proc*);
 void proc_freepagetable(pagetable_t, uint64);
 int kill(int);
@@ -156,9 +156,9 @@ void uart_putc_sync(int);
 int uart_getc(void);
 
 // vm.c
-void kvminit(void);
-void kvminithart(void);
-void kvmmap(pagetable_t, uint64, uint64, uint64, int);
+void k_vm_init(void);
+void k_vm_init_hart(void);
+void k_vm_map(pagetable_t, uint64, uint64, uint64, int);
 int mappages(pagetable_t, uint64, uint64, uint64, int);
 pagetable_t uvmcreate(void);
 void uvmfirst(pagetable_t, uchar*, uint);

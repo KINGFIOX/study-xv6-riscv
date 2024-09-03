@@ -29,16 +29,16 @@ struct spinlock wait_lock;
 // Allocate a page for each process's kernel stack.
 // Map it high in memory, followed by an invalid
 // guard page.
-void proc_mapstacks(pagetable_t kpgtbl)
+void proc_map_stacks(pagetable_t kpgtbl)
 {
     struct proc* p;
 
     for (p = proc; p < &proc[NPROC]; p++) {
-        char* pa = kalloc();
+        char* pa = k_alloc();
         if (pa == 0)
-            panic("kalloc");
+            panic("k_alloc");
         uint64 va = KSTACK((int)(p - proc));
-        kvmmap(kpgtbl, va, (uint64)pa, PGSIZE, PTE_R | PTE_W);
+        k_vm_map(kpgtbl, va, (uint64)pa, PGSIZE, PTE_R | PTE_W);
     }
 }
 
@@ -120,7 +120,7 @@ found:
     p->state = USED;
 
     // Allocate a trap_frame page.
-    if ((p->trap_frame = (struct trap_frame*)kalloc()) == 0) {
+    if ((p->trap_frame = (struct trap_frame*)k_alloc()) == 0) {
         freeproc(p);
         release(&p->lock);
         return 0;
@@ -150,7 +150,7 @@ static void
 freeproc(struct proc* p)
 {
     if (p->trap_frame)
-        kfree((void*)p->trap_frame);
+        k_free((void*)p->trap_frame);
     p->trap_frame = 0;
     if (p->pagetable)
         proc_freepagetable(p->pagetable, p->sz);

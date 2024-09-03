@@ -15,7 +15,10 @@
         devShell = pkgs.mkShell {
           buildInputs = with pkgs; [
             qemu
-            (with pkgsCross.riscv64-embedded; [ buildPackages.gcc ])
+            (with pkgsCross.riscv64-embedded; [
+              buildPackages.gcc
+              buildPackages.gdb
+            ])
           ];
           MAKEFLAGS = "-j$(nproc)";
         };

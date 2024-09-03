@@ -19,9 +19,11 @@ void init_lock(struct spinlock* lk, char* name)
 // Loops (spins) until the lock is acquired.
 void acquire(struct spinlock* lk)
 {
+    // 临界区域内: 关中断
     push_off(); // disable interrupts to avoid deadlock.
-    if (holding(lk))
+    if (holding(lk)) {
         panic("acquire");
+    }
 
     // On RISC-V, sync_lock_test_and_set turns into an atomic swap:
     //   a5 = 1
@@ -34,6 +36,7 @@ void acquire(struct spinlock* lk)
     // past this point, to ensure that the critical section's memory
     // references happen strictly after the lock is acquired.
     // On RISC-V, this emits a fence instruction.
+    // 给编译器看: 指令调度不会跨越
     __sync_synchronize();
 
     // Record info about lock acquisition for holding() and debugging.
@@ -43,8 +46,9 @@ void acquire(struct spinlock* lk)
 // Release the lock.
 void release(struct spinlock* lk)
 {
-    if (!holding(lk))
-        panic("release");
+    if (!holding(lk)) {
+        panic("release"); // 未持有锁, 但是却释放了
+    }
 
     lk->cpu = 0;
 
@@ -72,20 +76,25 @@ void release(struct spinlock* lk)
 // Interrupts must be off.
 int holding(struct spinlock* lk)
 {
-    int r;
-    r = (lk->locked && lk->cpu == my_cpu());
-    return r;
+    return (lk->locked && lk->cpu == my_cpu());
 }
 
 // push_off/pop_off are like intr_off()/intr_on() except that they are matched:
 // it takes two pop_off()s to undo two push_off()s.  Also, if interrupts
 // are initially off, then push_off, pop_off leaves them off.
 
+// push_off/pop_off 与 intr_off/intr_on 类似
+// 只不过 push/pop_off 需要个数上匹配
+
+/**
+ * @brief 这里单独处理 n_off = 0 的情况。int_ena 保存的是: push_off 之前的 intr 的状态
+ *
+ */
+
 void push_off(void)
 {
-    int old = intr_get();
-
-    intr_off();
+    int old = intr_get(); // 获取 关中断之前的 标志位
+    intr_off(); // 关中断
     if (my_cpu()->n_off == 0) {
         my_cpu()->int_ena = old;
     }
@@ -102,6 +111,7 @@ void pop_off(void)
         panic("pop_off");
     }
     c->n_off -= 1;
+    //
     if (c->n_off == 0 && c->int_ena) {
         intr_on();
     }

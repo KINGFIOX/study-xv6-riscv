@@ -38,8 +38,7 @@ printint(int fd, int xx, int base, int sgn)
         putc(fd, buf[i]);
 }
 
-static void
-printptr(int fd, uint64 x)
+static void printptr(int fd, uint64 x)
 {
     int i;
     putc(fd, '0');
