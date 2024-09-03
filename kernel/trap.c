@@ -18,7 +18,7 @@ extern int devintr();
 
 void trapinit(void)
 {
-    initlock(&tickslock, "time");
+    init_lock(&tickslock, "time");
 }
 
 // set up to take exceptions and traps while in the kernel.
@@ -45,7 +45,7 @@ void usertrap(void)
     struct proc* p = myproc();
 
     // save user program counter.
-    p->trapframe->epc = r_sepc();
+    p->trap_frame->epc = r_sepc();
 
     if (r_scause() == 8) {
         // system call
@@ -55,7 +55,7 @@ void usertrap(void)
 
         // sepc points to the ecall instruction,
         // but we want to return to the next instruction.
-        p->trapframe->epc += 4;
+        p->trap_frame->epc += 4;
 
         // an interrupt will change sepc, scause, and sstatus,
         // so enable only now that we're done with those registers.
@@ -96,12 +96,12 @@ void usertrapret(void)
     uint64 trampoline_uservec = TRAMPOLINE + (uservec - trampoline);
     w_stvec(trampoline_uservec);
 
-    // set up trapframe values that uservec will need when
+    // set up trap_frame values that uservec will need when
     // the process next traps into the kernel.
-    p->trapframe->kernel_satp = r_satp(); // kernel page table
-    p->trapframe->kernel_sp = p->kstack + PGSIZE; // process's kernel stack
-    p->trapframe->kernel_trap = (uint64)usertrap;
-    p->trapframe->kernel_hartid = r_tp(); // hartid for cpuid()
+    p->trap_frame->kernel_satp = r_satp(); // kernel page table
+    p->trap_frame->kernel_sp = p->kstack + PGSIZE; // process's kernel stack
+    p->trap_frame->kernel_trap = (uint64)usertrap;
+    p->trap_frame->kernel_hartid = r_tp(); // hartid for cpu_id()
 
     // set up the registers that trampoline.S's sret will use
     // to get to user space.
@@ -113,7 +113,7 @@ void usertrapret(void)
     w_sstatus(x);
 
     // set S Exception Program Counter to the saved user pc.
-    w_sepc(p->trapframe->epc);
+    w_sepc(p->trap_frame->epc);
 
     // tell trampoline.S the user page table to switch to.
     uint64 satp = MAKE_SATP(p->pagetable);
@@ -157,7 +157,7 @@ void kerneltrap()
 
 void clockintr()
 {
-    if (cpuid() == 0) {
+    if (cpu_id() == 0) {
         acquire(&tickslock);
         ticks++;
         wakeup(&ticks);
@@ -186,7 +186,7 @@ int devintr()
         int irq = plic_claim();
 
         if (irq == UART0_IRQ) {
-            uartintr();
+            uart_intr();
         } else if (irq == VIRTIO0_IRQ) {
             virtio_disk_intr();
         } else if (irq) {

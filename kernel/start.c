@@ -39,7 +39,7 @@ void start()
     // ask for clock interrupts.
     timerinit();
 
-    // keep each CPU's hartid in its tp register, for cpuid().
+    // keep each CPU's hartid in its tp register, for cpu_id().
     int id = r_mhartid();
     w_tp(id);
 

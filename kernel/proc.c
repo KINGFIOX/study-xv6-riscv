@@ -47,10 +47,10 @@ void procinit(void)
 {
     struct proc* p;
 
-    initlock(&pid_lock, "nextpid");
-    initlock(&wait_lock, "wait_lock");
+    init_lock(&pid_lock, "nextpid");
+    init_lock(&wait_lock, "wait_lock");
     for (p = proc; p < &proc[NPROC]; p++) {
-        initlock(&p->lock, "proc");
+        init_lock(&p->lock, "proc");
         p->state = UNUSED;
         p->kstack = KSTACK((int)(p - proc));
     }
@@ -59,7 +59,7 @@ void procinit(void)
 // Must be called with interrupts disabled,
 // to prevent race with process being moved
 // to a different CPU.
-int cpuid()
+int cpu_id()
 {
     int id = r_tp();
     return id;
@@ -67,10 +67,9 @@ int cpuid()
 
 // Return this CPU's cpu struct.
 // Interrupts must be disabled.
-struct cpu*
-mycpu(void)
+struct cpu* mycpu(void)
 {
-    int id = cpuid();
+    int id = cpu_id();
     struct cpu* c = &cpus[id];
     return c;
 }
@@ -121,8 +120,8 @@ found:
     p->pid = allocpid();
     p->state = USED;
 
-    // Allocate a trapframe page.
-    if ((p->trapframe = (struct trapframe*)kalloc()) == 0) {
+    // Allocate a trap_frame page.
+    if ((p->trap_frame = (struct trap_frame*)kalloc()) == 0) {
         freeproc(p);
         release(&p->lock);
         return 0;
@@ -151,9 +150,9 @@ found:
 static void
 freeproc(struct proc* p)
 {
-    if (p->trapframe)
-        kfree((void*)p->trapframe);
-    p->trapframe = 0;
+    if (p->trap_frame)
+        kfree((void*)p->trap_frame);
+    p->trap_frame = 0;
     if (p->pagetable)
         proc_freepagetable(p->pagetable, p->sz);
     p->pagetable = 0;
@@ -168,7 +167,7 @@ freeproc(struct proc* p)
 }
 
 // Create a user page table for a given process, with no user memory,
-// but with trampoline and trapframe pages.
+// but with trampoline and trap_frame pages.
 pagetable_t
 proc_pagetable(struct proc* p)
 {
@@ -190,10 +189,10 @@ proc_pagetable(struct proc* p)
         return 0;
     }
 
-    // map the trapframe page just below the trampoline page, for
+    // map the trap_frame page just below the trampoline page, for
     // trampoline.S.
     if (mappages(pagetable, TRAPFRAME, PGSIZE,
-            (uint64)(p->trapframe), PTE_R | PTE_W)
+            (uint64)(p->trap_frame), PTE_R | PTE_W)
         < 0) {
         uvmunmap(pagetable, TRAMPOLINE, 1, 0);
         uvmfree(pagetable, 0);
@@ -239,8 +238,8 @@ void userinit(void)
     p->sz = PGSIZE;
 
     // prepare for the very first "return" from kernel to user.
-    p->trapframe->epc = 0; // user program counter
-    p->trapframe->sp = PGSIZE; // user stack pointer
+    p->trap_frame->epc = 0; // user program counter
+    p->trap_frame->sp = PGSIZE; // user stack pointer
 
     safestrcpy(p->name, "initcode", sizeof(p->name));
     p->cwd = namei("/");
@@ -291,10 +290,10 @@ int fork(void)
     np->sz = p->sz;
 
     // copy saved user registers.
-    *(np->trapframe) = *(p->trapframe);
+    *(np->trap_frame) = *(p->trap_frame);
 
     // Cause fork to return 0 in the child.
-    np->trapframe->a0 = 0;
+    np->trap_frame->a0 = 0;
 
     // increment reference counts on open file descriptors.
     for (i = 0; i < NOFILE; i++)
@@ -471,28 +470,28 @@ void scheduler(void)
 
 // Switch to scheduler.  Must hold only p->lock
 // and have changed proc->state. Saves and restores
-// intena because intena is a property of this
+// int_ena because int_ena is a property of this
 // kernel thread, not this CPU. It should
-// be proc->intena and proc->noff, but that would
+// be proc->int_ena and proc->n_off, but that would
 // break in the few places where a lock is held but
 // there's no process.
 void sched(void)
 {
-    int intena;
+    int int_ena;
     struct proc* p = myproc();
 
     if (!holding(&p->lock))
         panic("sched p->lock");
-    if (mycpu()->noff != 1)
+    if (mycpu()->n_off != 1)
         panic("sched locks");
     if (p->state == RUNNING)
         panic("sched running");
     if (intr_get())
         panic("sched interruptible");
 
-    intena = mycpu()->intena;
+    int_ena = mycpu()->int_ena;
     swtch(&p->context, &mycpu()->context);
-    mycpu()->intena = intena;
+    mycpu()->int_ena = int_ena;
 }
 
 // Give up the CPU for one scheduling round.

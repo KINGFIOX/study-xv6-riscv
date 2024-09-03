@@ -18,18 +18,18 @@ void bpin(struct buf*);
 void bunpin(struct buf*);
 
 // console.c
-void consoleinit(void);
-void consoleintr(int);
-void consputc(int);
+void console_init(void);
+void console_intr(int);
+void cons_putc(int);
 
 // exec.c
 int exec(char*, char**);
 
 // file.c
-struct file* filealloc(void);
+struct file* file_alloc(void);
 void fileclose(struct file*);
 struct file* filedup(struct file*);
-void fileinit(void);
+void file_init(void);
 int fileread(struct file*, uint64, int n);
 int filestat(struct file*, uint64 addr);
 int filewrite(struct file*, uint64, int n);
@@ -79,10 +79,10 @@ int pipewrite(struct pipe*, uint64, int);
 // printf.c
 int printf(char*, ...) __attribute__((format(printf, 1, 2)));
 void panic(char*) __attribute__((noreturn));
-void printfinit(void);
+void printf_init(void);
 
 // proc.c
-int cpuid(void);
+int cpu_id(void);
 void exit(int);
 int fork(void);
 int growproc(int);
@@ -113,7 +113,7 @@ void swtch(struct context*, struct context*);
 // spinlock.c
 void acquire(struct spinlock*);
 int holding(struct spinlock*);
-void initlock(struct spinlock*, char*);
+void init_lock(struct spinlock*, char*);
 void release(struct spinlock*);
 void push_off(void);
 void pop_off(void);
@@ -149,11 +149,11 @@ extern struct spinlock tickslock;
 void usertrapret(void);
 
 // uart.c
-void uartinit(void);
-void uartintr(void);
-void uartputc(int);
-void uartputc_sync(int);
-int uartgetc(void);
+void uart_init(void);
+void uart_intr(void);
+void uart_putc(int);
+void uart_putc_sync(int);
+int uart_getc(void);
 
 // vm.c
 void kvminit(void);

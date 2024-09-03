@@ -341,7 +341,7 @@ sys_open(void)
         return -1;
     }
 
-    if ((f = filealloc()) == 0 || (fd = fdalloc(f)) < 0) {
+    if ((f = file_alloc()) == 0 || (fd = fdalloc(f)) < 0) {
         if (f)
             fileclose(f);
         iunlockput(ip);

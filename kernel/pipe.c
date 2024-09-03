@@ -25,7 +25,7 @@ int pipealloc(struct file** f0, struct file** f1)
 
     pi = 0;
     *f0 = *f1 = 0;
-    if ((*f0 = filealloc()) == 0 || (*f1 = filealloc()) == 0)
+    if ((*f0 = file_alloc()) == 0 || (*f1 = file_alloc()) == 0)
         goto bad;
     if ((pi = (struct pipe*)kalloc()) == 0)
         goto bad;
@@ -33,7 +33,7 @@ int pipealloc(struct file** f0, struct file** f1)
     pi->writeopen = 1;
     pi->nwrite = 0;
     pi->nread = 0;
-    initlock(&pi->lock, "pipe");
+    init_lock(&pi->lock, "pipe");
     (*f0)->type = FD_PIPE;
     (*f0)->readable = 1;
     (*f0)->writable = 0;

@@ -21,141 +21,128 @@ volatile int panicked = 0;
 static struct {
     struct spinlock lock;
     int locking;
-} pr;
+} pr; // 这种语法, 其实是声明匿名结构体, 并创建了一个对象 pr
 
-static char digits[] = "0123456789abcdef";
+static char digits[] = "0123456789abcdef"; // ascii, 查表
 
-static void
-printint(long long xx, int base, int sign)
+static void print_int(long long xx, int base, int sign)
 {
-    char buf[16];
-    int i;
+
     unsigned long long x;
-
-    if (sign && (sign = (xx < 0)))
+    if (sign && (xx < 0)) {
         x = -xx;
-    else
+        sign = 1; // 确实是负数, 显示 '-'
+    } else {
         x = xx;
+    }
 
-    i = 0;
+    char buf[16];
+    int i = 0;
     do {
-        buf[i++] = digits[x % base];
+        buf[i++] = digits[x % base]; // 低位, 低字节
     } while ((x /= base) != 0);
 
-    if (sign)
+    if (sign) {
         buf[i++] = '-';
+    }
 
-    while (--i >= 0)
-        consputc(buf[i]);
+    while (--i >= 0) {
+        // 倒过来打印, 符合人的书写方式
+        cons_putc(buf[i]);
+    }
 }
 
-static void
-printptr(uint64 x)
+/**
+ * @brief 打印地址
+ *
+ * @param x
+ */
+static void print_ptr(uint64 x)
 {
-    int i;
-    consputc('0');
-    consputc('x');
-    for (i = 0; i < (sizeof(uint64) * 2); i++, x <<= 4)
-        consputc(digits[x >> (sizeof(uint64) * 8 - 4)]);
+    cons_putc('0');
+    cons_putc('x');
+    for (int i = 0; i < (sizeof(uint64) * 2); i++, x <<= 4) {
+        cons_putc(digits[x >> (sizeof(uint64) * 8 - 4)]);
+    }
 }
 
 // Print to the console.
 int printf(char* fmt, ...)
 {
-    va_list ap;
-    int i, cx, c0, c1, c2, locking;
-    char* s;
 
-    locking = pr.locking;
-    if (locking)
+    int locking = pr.locking;
+    if (locking) {
         acquire(&pr.lock);
+    }
 
+    va_list ap;
     va_start(ap, fmt);
-    for (i = 0; (cx = fmt[i] & 0xff) != 0; i++) {
+
+    // 一个自动机
+    for (int i = 0, cx; (cx = fmt[i] & 0xff) != 0 /* 没有到 null 字符 */; i++) {
         if (cx != '%') {
-            consputc(cx);
+            cons_putc(cx);
             continue;
         }
+        // cx == %
         i++;
-        c0 = fmt[i + 0] & 0xff;
-        c1 = c2 = 0;
-        if (c0)
+        int c0 = fmt[i + 0] & 0xff; // 获取一个字符
+        int c1 = 0, c2 = 0;
+        if (c0) {
             c1 = fmt[i + 1] & 0xff;
-        if (c1)
+        }
+        if (c1) {
             c2 = fmt[i + 2] & 0xff;
+        }
         if (c0 == 'd') {
-            printint(va_arg(ap, int), 10, 1);
+            print_int(va_arg(ap, int), 10, 1);
         } else if (c0 == 'l' && c1 == 'd') {
-            printint(va_arg(ap, uint64), 10, 1);
+            print_int(va_arg(ap, uint64), 10, 1);
             i += 1;
         } else if (c0 == 'l' && c1 == 'l' && c2 == 'd') {
-            printint(va_arg(ap, uint64), 10, 1);
+            print_int(va_arg(ap, uint64), 10, 1);
             i += 2;
         } else if (c0 == 'u') {
-            printint(va_arg(ap, int), 10, 0);
+            print_int(va_arg(ap, int), 10, 0);
         } else if (c0 == 'l' && c1 == 'u') {
-            printint(va_arg(ap, uint64), 10, 0);
+            print_int(va_arg(ap, uint64), 10, 0);
             i += 1;
         } else if (c0 == 'l' && c1 == 'l' && c2 == 'u') {
-            printint(va_arg(ap, uint64), 10, 0);
+            print_int(va_arg(ap, uint64), 10, 0);
             i += 2;
         } else if (c0 == 'x') {
-            printint(va_arg(ap, int), 16, 0);
+            print_int(va_arg(ap, int), 16, 0);
         } else if (c0 == 'l' && c1 == 'x') {
-            printint(va_arg(ap, uint64), 16, 0);
+            print_int(va_arg(ap, uint64), 16, 0);
             i += 1;
         } else if (c0 == 'l' && c1 == 'l' && c2 == 'x') {
-            printint(va_arg(ap, uint64), 16, 0);
+            print_int(va_arg(ap, uint64), 16, 0);
             i += 2;
         } else if (c0 == 'p') {
-            printptr(va_arg(ap, uint64));
+            print_ptr(va_arg(ap, uint64));
         } else if (c0 == 's') {
-            if ((s = va_arg(ap, char*)) == 0)
+            char* s = 0;
+            if ((s = va_arg(ap, char*)) == 0) {
                 s = "(null)";
-            for (; *s; s++)
-                consputc(*s);
+            }
+            for (; *s; s++) {
+                cons_putc(*s);
+            }
         } else if (c0 == '%') {
-            consputc('%');
+            cons_putc('%');
         } else if (c0 == 0) {
             break;
         } else {
             // Print unknown % sequence to draw attention.
-            consputc('%');
-            consputc(c0);
+            cons_putc('%');
+            cons_putc(c0);
         }
-
-#if 0
-    switch(c){
-    case 'd':
-      printint(va_arg(ap, int), 10, 1);
-      break;
-    case 'x':
-      printint(va_arg(ap, int), 16, 1);
-      break;
-    case 'p':
-      printptr(va_arg(ap, uint64));
-      break;
-    case 's':
-      if((s = va_arg(ap, char*)) == 0)
-        s = "(null)";
-      for(; *s; s++)
-        consputc(*s);
-      break;
-    case '%':
-      consputc('%');
-      break;
-    default:
-      // Print unknown % sequence to draw attention.
-      consputc('%');
-      consputc(c);
-      break;
-    }
-#endif
     }
     va_end(ap);
 
-    if (locking)
+    if (locking) {
         release(&pr.lock);
+    }
 
     return 0;
 }
@@ -170,8 +157,8 @@ void panic(char* s)
         ;
 }
 
-void printfinit(void)
+void printf_init(void)
 {
-    initlock(&pr.lock, "pr");
+    init_lock(&pr.lock, "pr");
     pr.locking = 1;
 }

@@ -16,17 +16,16 @@
 struct devsw devsw[NDEV];
 struct {
     struct spinlock lock;
-    struct file file[NFILE];
+    struct file file[NFILE]; // 至多有 NFILE 个文件
 } ftable;
 
-void fileinit(void)
+void file_init(void)
 {
-    initlock(&ftable.lock, "ftable");
+    init_lock(&ftable.lock, "ftable");
 }
 
 // Allocate a file structure.
-struct file*
-filealloc(void)
+struct file* file_alloc(void)
 {
     struct file* f;
 

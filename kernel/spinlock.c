@@ -8,7 +8,7 @@
 #include "proc.h"
 #include "defs.h"
 
-void initlock(struct spinlock* lk, char* name)
+void init_lock(struct spinlock* lk, char* name)
 {
     lk->name = name;
     lk->locked = 0;
@@ -86,9 +86,9 @@ void push_off(void)
     int old = intr_get();
 
     intr_off();
-    if (mycpu()->noff == 0)
-        mycpu()->intena = old;
-    mycpu()->noff += 1;
+    if (mycpu()->n_off == 0)
+        mycpu()->int_ena = old;
+    mycpu()->n_off += 1;
 }
 
 void pop_off(void)
@@ -96,9 +96,9 @@ void pop_off(void)
     struct cpu* c = mycpu();
     if (intr_get())
         panic("pop_off - interruptible");
-    if (c->noff < 1)
+    if (c->n_off < 1)
         panic("pop_off");
-    c->noff -= 1;
-    if (c->noff == 0 && c->intena)
+    c->n_off -= 1;
+    if (c->n_off == 0 && c->int_ena)
         intr_on();
 }

@@ -25,7 +25,7 @@ struct {
 
 void kinit()
 {
-    initlock(&kmem.lock, "kmem");
+    init_lock(&kmem.lock, "kmem");
     freerange(end, (void*)PHYSTOP);
 }
 
