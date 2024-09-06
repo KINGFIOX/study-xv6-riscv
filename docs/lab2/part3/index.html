@@ -1729,9 +1729,9 @@
 </ul>
 <p>在内核部分：</p>
 <ul>
-<li>更改内核部分的wait接口定义（在<code>defs.h</code>中），以及相应的函数接口（<code>proc.c: wait(uint64)</code>）；</li>
+<li>更改内核部分的wait接口定义（在<code>defs.h</code>中），以及相应的函数接口（<code>proc.c: wait(uint64_t)</code>）；</li>
 <li>在<code>sysproc.c: sys_wait(void)</code>函数中获取用户态传入的新参数；</li>
-<li>在<code>proc.c: wait(uint64, int)</code>中实现非阻塞逻辑。</li>
+<li>在<code>proc.c: wait(uint64_t, int)</code>中实现非阻塞逻辑。</li>
 <li>然后启动xv6，在shell输入 <code>waittest</code> ，要能满足<a href="../part1/#33">实验概述</a>中提到的输出。</li>
 </ul>
 <h2 id="3-yield">3. 任务三：实现yield系统调用<a class="headerlink" href="#3-yield" title="Permanent link">&para;</a></h2>

@@ -1925,9 +1925,9 @@ sleep(p, &amp;p-&gt;lock);  // DOC: wait-sleep
 <!-- sysinfo只需要一个参数，这个参数是结构体 `sysinfo`的指针， **这个结构体在kernel/sysinfo.h** 可以找到。xv6内核的工作就是把这个结构体填上应有的数值。下面介绍结构体每个成员的含义
 
 <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="mi">1</span><span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">sysinfo</span><span class="w"> </span><span class="p">{</span>
-<span class="w"> </span><span class="mi">2</span><span class="w">    </span><span class="n">uint64</span><span class="w"> </span><span class="n">freemem</span><span class="p">;</span><span class="w">   </span><span class="c1">// amount of free memory (bytes)</span>
-<span class="w"> </span><span class="mi">3</span><span class="w">    </span><span class="n">uint64</span><span class="w"> </span><span class="n">nproc</span><span class="p">;</span><span class="w">     </span><span class="c1">// number of process</span>
-<span class="w"> </span><span class="mi">4</span><span class="w">    </span><span class="n">uint64</span><span class="w"> </span><span class="n">freefd</span><span class="p">;</span><span class="w">    </span><span class="c1">// number of free file descriptor</span>
+<span class="w"> </span><span class="mi">2</span><span class="w">    </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">freemem</span><span class="p">;</span><span class="w">   </span><span class="c1">// amount of free memory (bytes)</span>
+<span class="w"> </span><span class="mi">3</span><span class="w">    </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">nproc</span><span class="p">;</span><span class="w">     </span><span class="c1">// number of process</span>
+<span class="w"> </span><span class="mi">4</span><span class="w">    </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">freefd</span><span class="p">;</span><span class="w">    </span><span class="c1">// number of free file descriptor</span>
 <span class="w"> </span><span class="mi">5</span><span class="w">  </span><span class="p">};</span>
 </code></pre></div>
 

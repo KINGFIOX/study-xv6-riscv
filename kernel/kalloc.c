@@ -35,7 +35,7 @@ void k_init()
 /// @param pa_end
 void free_range(void* pa_start, void* pa_end)
 {
-    for (char* p = (char*)PGROUNDUP((uint64)pa_start); p + PGSIZE <= (char*)pa_end; p += PGSIZE) {
+    for (char* p = (char*)PGROUNDUP((uint64_t)pa_start); p + PGSIZE <= (char*)pa_end; p += PGSIZE) {
         k_free(p); // p 是 一个 page
     }
 }
@@ -49,9 +49,9 @@ void free_range(void* pa_start, void* pa_end)
 /// @param pa
 void k_free(void* pa)
 {
-    if (((uint64)pa % PGSIZE) != 0 /* 对齐 ? */
+    if (((uint64_t)pa % PGSIZE) != 0 /* 对齐 ? */
         || (char*)pa < end
-        || (uint64)pa >= PHYSTOP) {
+        || (uint64_t)pa >= PHYSTOP) {
         panic("k_free");
     }
 

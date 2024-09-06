@@ -2056,7 +2056,7 @@
 <div class="admonition note">
 <p class="admonition-title">提示</p>
 <p>根据RISC-V标准规定，函数调用通过寄存器传递参数。在内核中可以通过argint、argaddr等函数获取系统调用的参数，分别对应整数和指针，它们都调用argraw来读取已保存的寄存器。比如，<code>kernel/sycall.c</code>中 <code>argraw</code>函数所描述的就是取出参数的过程。</p>
-<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="nf">argraw</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="nf">argraw</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">proc</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myproc</span><span class="p">();</span>
 <span class="w">  </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="k">case</span><span class="w"> </span><span class="mi">0</span><span class="p">:</span>
@@ -2073,15 +2073,15 @@
 <div class="admonition info">
 <p class="admonition-title">提示</p>
 <p>我们需要关注<code>kernel/syscall.c</code>中定义了一大段看起来就和系统调用有关的部分。这里可以分为两个部分，一个是 <code>extern</code> 进行标识的函数接口，另一个是以<code>syscall</code>为名的数组。</p>
-<div class="highlight"><pre><span></span><code><span class="k">extern</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="nf">sys_chdir</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
-<span class="k">extern</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="nf">sys_close</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
-<span class="k">extern</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="nf">sys_dup</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
-<span class="k">extern</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="nf">sys_exec</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
-<span class="k">extern</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="nf">sys_exit</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><span class="k">extern</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="nf">sys_chdir</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+<span class="k">extern</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="nf">sys_close</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+<span class="k">extern</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="nf">sys_dup</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+<span class="k">extern</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="nf">sys_exec</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+<span class="k">extern</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="nf">sys_exit</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 
 <span class="c1">// ……</span>
 
-<span class="k">static</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">syscalls</span><span class="p">[])(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="k">static</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">syscalls</span><span class="p">[])(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="p">[</span><span class="n">SYS_fork</span><span class="p">]</span><span class="w"> </span><span class="n">sys_fork</span><span class="p">,</span><span class="w">   </span><span class="p">[</span><span class="n">SYS_exit</span><span class="p">]</span><span class="w"> </span><span class="n">sys_exit</span><span class="p">,</span><span class="w">     </span><span class="p">[</span><span class="n">SYS_wait</span><span class="p">]</span><span class="w"> </span><span class="n">sys_wait</span><span class="p">,</span><span class="w">     </span><span class="p">[</span><span class="n">SYS_pipe</span><span class="p">]</span><span class="w"> </span><span class="n">sys_pipe</span><span class="p">,</span>
 <span class="w">    </span><span class="p">[</span><span class="n">SYS_read</span><span class="p">]</span><span class="w"> </span><span class="n">sys_read</span><span class="p">,</span><span class="w">   </span><span class="p">[</span><span class="n">SYS_kill</span><span class="p">]</span><span class="w"> </span><span class="n">sys_kill</span><span class="p">,</span><span class="w">     </span><span class="p">[</span><span class="n">SYS_exec</span><span class="p">]</span><span class="w"> </span><span class="n">sys_exec</span><span class="p">,</span><span class="w">     </span><span class="p">[</span><span class="n">SYS_fstat</span><span class="p">]</span><span class="w"> </span><span class="n">sys_fstat</span><span class="p">,</span>
 <span class="w">    </span><span class="p">[</span><span class="n">SYS_chdir</span><span class="p">]</span><span class="w"> </span><span class="n">sys_chdir</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">SYS_dup</span><span class="p">]</span><span class="w"> </span><span class="n">sys_dup</span><span class="p">,</span><span class="w">       </span><span class="p">[</span><span class="n">SYS_getpid</span><span class="p">]</span><span class="w"> </span><span class="n">sys_getpid</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">SYS_sbrk</span><span class="p">]</span><span class="w"> </span><span class="n">sys_sbrk</span><span class="p">,</span>
@@ -2146,11 +2146,11 @@
 <p>syscall函数里有一个表单，根据传入的代表系统调用的数字进行查找，并执行具体实现系统调用功能的函数。对于这个例子来说，这个函数就是sys_sleep。</p>
 <h3 id="26-sys_sleep">2.6 sys_sleep<a class="headerlink" href="#26-sys_sleep" title="Permanent link">&para;</a></h3>
 <p>其代码可见 <code>kernel/sysproc.c</code> line55-74：</p>
-<div class="highlight"><pre><span></span><code><span class="mi">55</span><span class="w">  </span><span class="n">uint64</span>
+<div class="highlight"><pre><span></span><code><span class="mi">55</span><span class="w">  </span><span class="n">uint64_t</span>
 <span class="mi">56</span><span class="w">  </span><span class="n">sys_sleep</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 <span class="mi">57</span><span class="w">  </span><span class="p">{</span>
 <span class="mi">58</span><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
-<span class="mi">59</span><span class="w">    </span><span class="n">uint</span><span class="w"> </span><span class="n">ticks0</span><span class="p">;</span>
+<span class="mi">59</span><span class="w">    </span><span class="n">uint_t</span><span class="w"> </span><span class="n">ticks0</span><span class="p">;</span>
 <span class="mi">60</span>
 <span class="mi">61</span><span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">argint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
 <span class="mi">62</span><span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
@@ -2210,8 +2210,8 @@
 <span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">pid</span><span class="p">;</span><span class="w">                     </span><span class="c1">// Process ID</span>
 
 <span class="w">  </span><span class="c1">// these are private to the process, so p-&gt;lock need not be held.</span>
-<span class="w">  </span><span class="n">uint64</span><span class="w"> </span><span class="n">kstack</span><span class="p">;</span><span class="w">               </span><span class="c1">// Virtual address of kernel stack</span>
-<span class="w">  </span><span class="n">uint64</span><span class="w"> </span><span class="n">sz</span><span class="p">;</span><span class="w">                   </span><span class="c1">// Size of process memory (bytes)</span>
+<span class="w">  </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">kstack</span><span class="p">;</span><span class="w">               </span><span class="c1">// Virtual address of kernel stack</span>
+<span class="w">  </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">sz</span><span class="p">;</span><span class="w">                   </span><span class="c1">// Size of process memory (bytes)</span>
 <span class="w">  </span><span class="n">pagetable_t</span><span class="w"> </span><span class="n">pagetable</span><span class="p">;</span><span class="w">       </span><span class="c1">// User page table</span>
 <span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">trapframe</span><span class="w"> </span><span class="o">*</span><span class="n">trapframe</span><span class="p">;</span><span class="w"> </span><span class="c1">// data page for trampoline.S</span>
 <span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">context</span><span class="w"> </span><span class="n">context</span><span class="p">;</span><span class="w">      </span><span class="c1">// swtch() here to run process</span>
@@ -2232,42 +2232,42 @@
 <p>在这里我们对trapframe这一概念进行详细介绍。</p>
 <p>我们知道，当进程从用户态陷入内核时，由于内核态也需要用到寄存器，因此需要将用户态的上下文（寄存器信息）保存起来，以便于后面返回用户态时重新恢复这些上下文（寄存器）。</p>
 <p><div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">trapframe</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="cm">/*   0 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">kernel_satp</span><span class="p">;</span><span class="w">   </span><span class="c1">// kernel page table</span>
-<span class="w">  </span><span class="cm">/*   8 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">kernel_sp</span><span class="p">;</span><span class="w">     </span><span class="c1">// top of process&#39;s kernel stack</span>
-<span class="w">  </span><span class="cm">/*  16 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">kernel_trap</span><span class="p">;</span><span class="w">   </span><span class="c1">// usertrap()</span>
-<span class="w">  </span><span class="cm">/*  24 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">epc</span><span class="p">;</span><span class="w">           </span><span class="c1">// saved user program counter</span>
-<span class="w">  </span><span class="cm">/*  32 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">kernel_hartid</span><span class="p">;</span><span class="w"> </span><span class="c1">// saved kernel tp</span>
-<span class="w">  </span><span class="cm">/*  40 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">ra</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/*  48 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">sp</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/*  56 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">gp</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/*  64 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">tp</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/*  72 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">t0</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/*  80 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">t1</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/*  88 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">t2</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/*  96 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">s0</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 104 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">s1</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 112 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">a0</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 120 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">a1</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 128 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">a2</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 136 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">a3</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 144 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">a4</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 152 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">a5</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 160 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">a6</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 168 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">a7</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 176 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">s2</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 184 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">s3</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 192 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">s4</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 200 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">s5</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 208 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">s6</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 216 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">s7</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 224 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">s8</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 232 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">s9</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 240 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">s10</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 248 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">s11</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 256 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">t3</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 264 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">t4</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 272 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">t5</span><span class="p">;</span>
-<span class="w">  </span><span class="cm">/* 280 */</span><span class="w"> </span><span class="n">uint64</span><span class="w"> </span><span class="n">t6</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/*   0 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">kernel_satp</span><span class="p">;</span><span class="w">   </span><span class="c1">// kernel page table</span>
+<span class="w">  </span><span class="cm">/*   8 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">kernel_sp</span><span class="p">;</span><span class="w">     </span><span class="c1">// top of process&#39;s kernel stack</span>
+<span class="w">  </span><span class="cm">/*  16 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">kernel_trap</span><span class="p">;</span><span class="w">   </span><span class="c1">// usertrap()</span>
+<span class="w">  </span><span class="cm">/*  24 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">epc</span><span class="p">;</span><span class="w">           </span><span class="c1">// saved user program counter</span>
+<span class="w">  </span><span class="cm">/*  32 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">kernel_hartid</span><span class="p">;</span><span class="w"> </span><span class="c1">// saved kernel tp</span>
+<span class="w">  </span><span class="cm">/*  40 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">ra</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/*  48 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">sp</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/*  56 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">gp</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/*  64 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">tp</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/*  72 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">t0</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/*  80 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">t1</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/*  88 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">t2</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/*  96 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">s0</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 104 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">s1</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 112 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">a0</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 120 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">a1</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 128 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">a2</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 136 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">a3</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 144 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">a4</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 152 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">a5</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 160 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">a6</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 168 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">a7</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 176 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">s2</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 184 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">s3</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 192 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">s4</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 200 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">s5</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 208 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">s6</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 216 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">s7</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 224 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">s8</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 232 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">s9</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 240 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">s10</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 248 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">s11</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 256 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">t3</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 264 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">t4</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 272 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">t5</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* 280 */</span><span class="w"> </span><span class="n">uint64_t</span><span class="w"> </span><span class="n">t6</span><span class="p">;</span>
 <span class="p">};</span>
 </code></pre></div>
 上面是xv6对trapframe结构体的定义，我们可以看见，trapframe当中包含内核的栈指针（<code>kernel_sp</code>）、内核页表指针（<code>kernel_satp</code>）等内核态相关的信息。</p>

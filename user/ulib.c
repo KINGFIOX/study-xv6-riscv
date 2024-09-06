@@ -27,10 +27,10 @@ int strcmp(const char* p, const char* q)
 {
     while (*p && *p == *q)
         p++, q++;
-    return (uchar)*p - (uchar)*q;
+    return (uchar_t)*p - (uchar_t)*q;
 }
 
-uint strlen(const char* s)
+uint_t strlen(const char* s)
 {
     int n;
 
@@ -39,7 +39,7 @@ uint strlen(const char* s)
     return n;
 }
 
-void* memset(void* dst, int c, uint n)
+void* memset(void* dst, int c, uint_t n)
 {
     char* cdst = (char*)dst;
     int i;
@@ -125,7 +125,7 @@ void* memmove(void* vdst, const void* vsrc, int n)
     return vdst;
 }
 
-int memcmp(const void* s1, const void* s2, uint n)
+int memcmp(const void* s1, const void* s2, uint_t n)
 {
     const char *p1 = s1, *p2 = s2;
     while (n-- > 0) {
@@ -138,7 +138,7 @@ int memcmp(const void* s1, const void* s2, uint n)
     return 0;
 }
 
-void* memcpy(void* dst, const void* src, uint n)
+void* memcpy(void* dst, const void* src, uint_t n)
 {
     return memmove(dst, src, n);
 }
