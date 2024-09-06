@@ -79,7 +79,7 @@ struct trap_frame {
     /* 280 */ uint64 t6;
 };
 
-enum procstate { UNUSED,
+enum proc_state { UNUSED,
     USED,
     SLEEPING,
     RUNNABLE,
@@ -91,7 +91,7 @@ struct proc {
     struct spinlock lock;
 
     // p->lock must be held when using these:
-    enum procstate state; // Process state
+    enum proc_state state; // Process state
     void* chan; // If non-zero, sleeping on chan
     int killed; // If non-zero, have been killed
     int xstate; // Exit status to be returned to parent's wait

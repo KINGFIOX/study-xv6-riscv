@@ -19,7 +19,7 @@ void main()
         k_init(); // physical page allocator
         k_vm_init(); // create kernel page table
         k_vm_init_hart(); // turn on paging
-        procinit(); // process table
+        proc_init(); // process table
         trapinit(); // trap vectors
         trapinithart(); // install kernel trap vector
         plicinit(); // set up interrupt controller
@@ -28,7 +28,7 @@ void main()
         iinit(); // inode table
         file_init(); // file table
         virtio_disk_init(); // emulated hard disk
-        userinit(); // first user process
+        user_init(); // first user process
         __sync_synchronize();
         started = 1;
     } else {

@@ -16,16 +16,14 @@ static inline uint64 r_mhartid()
 #define MSTATUS_MPP_U (0L << 11)
 #define MSTATUS_MIE (1L << 3) // machine-mode interrupt enable.
 
-static inline uint64
-r_mstatus()
+static inline uint64 r_mstatus()
 {
     uint64 x;
     asm volatile("csrr %0, mstatus" : "=r"(x));
     return x;
 }
 
-static inline void
-w_mstatus(uint64 x)
+static inline void w_mstatus(uint64 x)
 {
     asm volatile("csrw mstatus, %0" : : "r"(x));
 }
@@ -33,8 +31,7 @@ w_mstatus(uint64 x)
 // machine exception program counter, holds the
 // instruction address to which a return from
 // exception will go.
-static inline void
-w_mepc(uint64 x)
+static inline void w_mepc(uint64 x)
 {
     asm volatile("csrw mepc, %0" : : "r"(x));
 }
@@ -60,16 +57,14 @@ static inline void w_sstatus(uint64 x)
 }
 
 // Supervisor Interrupt Pending
-static inline uint64
-r_sip()
+static inline uint64 r_sip()
 {
     uint64 x;
     asm volatile("csrr %0, sip" : "=r"(x));
     return x;
 }
 
-static inline void
-w_sip(uint64 x)
+static inline void w_sip(uint64 x)
 {
     asm volatile("csrw sip, %0" : : "r"(x));
 }
@@ -78,32 +73,28 @@ w_sip(uint64 x)
 #define SIE_SEIE (1L << 9) // external
 #define SIE_STIE (1L << 5) // timer
 #define SIE_SSIE (1L << 1) // software
-static inline uint64
-r_sie()
+static inline uint64 r_sie()
 {
     uint64 x;
     asm volatile("csrr %0, sie" : "=r"(x));
     return x;
 }
 
-static inline void
-w_sie(uint64 x)
+static inline void w_sie(uint64 x)
 {
     asm volatile("csrw sie, %0" : : "r"(x));
 }
 
 // Machine-mode Interrupt Enable
 #define MIE_STIE (1L << 5) // supervisor timer
-static inline uint64
-r_mie()
+static inline uint64 r_mie()
 {
     uint64 x;
     asm volatile("csrr %0, mie" : "=r"(x));
     return x;
 }
 
-static inline void
-w_mie(uint64 x)
+static inline void w_mie(uint64 x)
 {
     asm volatile("csrw mie, %0" : : "r"(x));
 }
@@ -189,6 +180,8 @@ static inline void w_menvcfg(uint64 x)
     asm volatile("csrw menvcfg, %0" : : "r"(x));
 }
 
+/* ---------- ---------- 分页 ---------- ---------- */
+
 // Physical Memory Protection
 static inline void w_pmpcfg0(uint64 x)
 {
@@ -207,23 +200,22 @@ static inline void w_pmpaddr0(uint64 x)
 
 // supervisor address translation and protection;
 // holds the address of the page table.
-static inline void
-w_satp(uint64 x)
+static inline void w_satp(uint64 x)
 {
     asm volatile("csrw satp, %0" : : "r"(x));
 }
 
-static inline uint64
-r_satp()
+static inline uint64 r_satp()
 {
     uint64 x;
     asm volatile("csrr %0, satp" : "=r"(x));
     return x;
 }
 
+/* ---------- ---------- ---------- ---------- */
+
 // Supervisor Trap Cause
-static inline uint64
-r_scause()
+static inline uint64 r_scause()
 {
     uint64 x;
     asm volatile("csrr %0, scause" : "=r"(x));
@@ -231,8 +223,7 @@ r_scause()
 }
 
 // Supervisor Trap Value
-static inline uint64
-r_stval()
+static inline uint64 r_stval()
 {
     uint64 x;
     asm volatile("csrr %0, stval" : "=r"(x));
@@ -240,14 +231,12 @@ r_stval()
 }
 
 // Machine-mode Counter-Enable
-static inline void
-w_mcounteren(uint64 x)
+static inline void w_mcounteren(uint64 x)
 {
     asm volatile("csrw mcounteren, %0" : : "r"(x));
 }
 
-static inline uint64
-r_mcounteren()
+static inline uint64 r_mcounteren()
 {
     uint64 x;
     asm volatile("csrr %0, mcounteren" : "=r"(x));
@@ -255,8 +244,7 @@ r_mcounteren()
 }
 
 // machine-mode cycle counter
-static inline uint64
-r_time()
+static inline uint64 r_time()
 {
     uint64 x;
     asm volatile("csrr %0, time" : "=r"(x));
@@ -264,8 +252,7 @@ r_time()
 }
 
 // enable device interrupts
-static inline void
-intr_on()
+static inline void intr_on()
 {
     w_sstatus(r_sstatus() | SSTATUS_SIE);
 }
@@ -290,8 +277,7 @@ static inline int intr_get()
     return (x & SSTATUS_SIE) != 0;
 }
 
-static inline uint64
-r_sp()
+static inline uint64 r_sp()
 {
     uint64 x;
     asm volatile("mv %0, sp" : "=r"(x));
@@ -307,14 +293,12 @@ static inline uint64 r_tp()
     return x;
 }
 
-static inline void
-w_tp(uint64 x)
+static inline void w_tp(uint64 x)
 {
     asm volatile("mv tp, %0" : : "r"(x));
 }
 
-static inline uint64
-r_ra()
+static inline uint64 r_ra()
 {
     uint64 x;
     asm volatile("mv %0, ra" : "=r"(x));
@@ -322,15 +306,14 @@ r_ra()
 }
 
 // flush the TLB.
-static inline void
-sfence_vma()
+static inline void sfence_vma()
 {
     // the zero, zero means flush all TLB entries.
     asm volatile("sfence.vma zero, zero");
 }
 
 typedef uint64 pte_t;
-typedef uint64* pagetable_t; // 512 PTEs
+typedef uint64* pagetable_t; // 512 PTEs, 数组
 
 #endif // __ASSEMBLER__
 
@@ -350,17 +333,22 @@ typedef uint64* pagetable_t; // 512 PTEs
 // shift a physical address to the right place for a PTE.
 #define PA2PTE(pa) ((((uint64)pa) >> 12) << 10)
 
+// 将 offset 置为 0
 #define PTE2PA(pte) (((pte) >> 10) << 12)
 
 #define PTE_FLAGS(pte) ((pte) & 0x3FF)
 
 // extract the three 9-bit page table indices from a virtual address.
 #define PXMASK 0x1FF // 9 bits
-#define PXSHIFT(level) (PGSHIFT + (9 * (level)))
+#define PXSHIFT(level) (PGSHIFT /* 12 */ + (9 * (level)))
+
+// level 2: [41, 30]
+// level 1: [29, 21]
 #define PX(level, va) ((((uint64)(va)) >> PXSHIFT(level)) & PXMASK)
 
 // one beyond the highest possible virtual address.
 // MAXVA is actually one bit less than the max allowed by
 // Sv39, to avoid having to sign-extend virtual addresses
 // that have the high bit set.
+//
 #define MAXVA (1L << (9 + 9 + 9 + 12 - 1))

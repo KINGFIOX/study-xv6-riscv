@@ -61,7 +61,7 @@ int exec(char* path, char** argv)
         if (ph.vaddr % PGSIZE != 0)
             goto bad;
         uint64 sz1;
-        if ((sz1 = uvmalloc(pagetable, sz, ph.vaddr + ph.memsz, flags2perm(ph.flags))) == 0)
+        if ((sz1 = uvm_alloc(pagetable, sz, ph.vaddr + ph.memsz, flags2perm(ph.flags))) == 0)
             goto bad;
         sz = sz1;
         if (loadseg(pagetable, ph.vaddr, ip, ph.off, ph.filesz) < 0)
@@ -79,7 +79,7 @@ int exec(char* path, char** argv)
     // Use the rest as the user stack.
     sz = PGROUNDUP(sz);
     uint64 sz1;
-    if ((sz1 = uvmalloc(pagetable, sz, sz + (USERSTACK + 1) * PGSIZE, PTE_W)) == 0)
+    if ((sz1 = uvm_alloc(pagetable, sz, sz + (USERSTACK + 1) * PGSIZE, PTE_W)) == 0)
         goto bad;
     sz = sz1;
     uvmclear(pagetable, sz - (USERSTACK + 1) * PGSIZE);
@@ -125,13 +125,13 @@ int exec(char* path, char** argv)
     p->sz = sz;
     p->trap_frame->epc = elf.entry; // initial program counter = main
     p->trap_frame->sp = sp; // initial stack pointer
-    proc_freepagetable(oldpagetable, oldsz);
+    proc_free_pagetable(oldpagetable, oldsz);
 
     return argc; // this ends up in a0, the first argument to main(argc, argv)
 
 bad:
     if (pagetable)
-        proc_freepagetable(pagetable, sz);
+        proc_free_pagetable(pagetable, sz);
     if (ip) {
         iunlockput(ip);
         end_op();
@@ -150,7 +150,7 @@ loadseg(pagetable_t pagetable, uint64 va, struct inode* ip, uint offset, uint sz
     uint64 pa;
 
     for (i = 0; i < sz; i += PGSIZE) {
-        pa = walkaddr(pagetable, va + i);
+        pa = walk_addr(pagetable, va + i);
         if (pa == 0)
             panic("loadseg: address should exist");
         if (sz - i < PGSIZE)

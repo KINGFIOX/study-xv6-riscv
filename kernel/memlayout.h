@@ -43,6 +43,7 @@
 
 // map the trampoline page to the highest address,
 // in both user and kernel space.
+// 虚拟地址空间最高的一个 page
 #define TRAMPOLINE (MAXVA - PGSIZE)
 
 // map kernel stacks beneath the trampoline,
@@ -58,4 +59,5 @@
 //   ...
 //   TRAPFRAME (p->trap_frame, used by the trampoline)
 //   TRAMPOLINE (the same page as in the kernel)
+// trap frame
 #define TRAPFRAME (TRAMPOLINE - PGSIZE)
