@@ -57,12 +57,12 @@ static void print_int(long long xx, int base, int sign)
  *
  * @param x
  */
-static void print_ptr(uint64 x)
+static void print_ptr(uint64_t x)
 {
     cons_putc('0');
     cons_putc('x');
-    for (int i = 0; i < (sizeof(uint64) * 2); i++, x <<= 4) {
-        cons_putc(digits[x >> (sizeof(uint64) * 8 - 4)]);
+    for (int i = 0; i < (sizeof(uint64_t) * 2); i++, x <<= 4) {
+        cons_putc(digits[x >> (sizeof(uint64_t) * 8 - 4)]);
     }
 }
 
@@ -97,29 +97,29 @@ int printf(char* fmt, ...)
         if (c0 == 'd') {
             print_int(va_arg(ap, int), 10, 1);
         } else if (c0 == 'l' && c1 == 'd') {
-            print_int(va_arg(ap, uint64), 10, 1);
+            print_int(va_arg(ap, uint64_t), 10, 1);
             i += 1;
         } else if (c0 == 'l' && c1 == 'l' && c2 == 'd') {
-            print_int(va_arg(ap, uint64), 10, 1);
+            print_int(va_arg(ap, uint64_t), 10, 1);
             i += 2;
         } else if (c0 == 'u') {
             print_int(va_arg(ap, int), 10, 0);
         } else if (c0 == 'l' && c1 == 'u') {
-            print_int(va_arg(ap, uint64), 10, 0);
+            print_int(va_arg(ap, uint64_t), 10, 0);
             i += 1;
         } else if (c0 == 'l' && c1 == 'l' && c2 == 'u') {
-            print_int(va_arg(ap, uint64), 10, 0);
+            print_int(va_arg(ap, uint64_t), 10, 0);
             i += 2;
         } else if (c0 == 'x') {
             print_int(va_arg(ap, int), 16, 0);
         } else if (c0 == 'l' && c1 == 'x') {
-            print_int(va_arg(ap, uint64), 16, 0);
+            print_int(va_arg(ap, uint64_t), 16, 0);
             i += 1;
         } else if (c0 == 'l' && c1 == 'l' && c2 == 'x') {
-            print_int(va_arg(ap, uint64), 16, 0);
+            print_int(va_arg(ap, uint64_t), 16, 0);
             i += 2;
         } else if (c0 == 'p') {
-            print_ptr(va_arg(ap, uint64));
+            print_ptr(va_arg(ap, uint64_t));
         } else if (c0 == 's') {
             char* s = 0;
             if ((s = va_arg(ap, char*)) == 0) {

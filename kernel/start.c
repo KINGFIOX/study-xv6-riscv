@@ -22,7 +22,7 @@ void start()
 
     // set M Exception Program Counter to main, for mret.
     // requires gcc -mcmodel=medany
-    w_mepc((uint64)main);
+    w_mepc((uint64_t)main);
 
     // disable paging for now.
     w_satp(0);
@@ -46,7 +46,7 @@ void start()
     w_tp(id);
 
     // switch to supervisor mode and jump to main().
-    asm volatile("mret");
+    __asm__ volatile("mret");
 }
 
 // ask each hart to generate timer interrupts.

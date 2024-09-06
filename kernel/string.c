@@ -1,6 +1,6 @@
 #include "types.h"
 
-void* memset(void* dst, int c, uint n)
+void* memset(void* dst, int c, uint_t n)
 {
     char* cdst = (char*)dst;
     int i;
@@ -10,9 +10,9 @@ void* memset(void* dst, int c, uint n)
     return dst;
 }
 
-int memcmp(const void* v1, const void* v2, uint n)
+int memcmp(const void* v1, const void* v2, uint_t n)
 {
-    const uchar *s1, *s2;
+    const uchar_t *s1, *s2;
 
     s1 = v1;
     s2 = v2;
@@ -25,7 +25,7 @@ int memcmp(const void* v1, const void* v2, uint n)
     return 0;
 }
 
-void* memmove(void* dst, const void* src, uint n)
+void* memmove(void* dst, const void* src, uint_t n)
 {
     const char* s;
     char* d;
@@ -48,18 +48,18 @@ void* memmove(void* dst, const void* src, uint n)
 }
 
 // memcpy exists to placate GCC.  Use memmove.
-void* memcpy(void* dst, const void* src, uint n)
+void* memcpy(void* dst, const void* src, uint_t n)
 {
     return memmove(dst, src, n);
 }
 
-int strncmp(const char* p, const char* q, uint n)
+int strncmp(const char* p, const char* q, uint_t n)
 {
     while (n > 0 && *p && *p == *q)
         n--, p++, q++;
     if (n == 0)
         return 0;
-    return (uchar)*p - (uchar)*q;
+    return (uchar_t)*p - (uchar_t)*q;
 }
 
 char* strncpy(char* s, const char* t, int n)

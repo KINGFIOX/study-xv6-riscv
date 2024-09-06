@@ -8,7 +8,7 @@ struct file {
     char writable;
     struct pipe* pipe; // FD_PIPE
     struct inode* ip; // FD_INODE and FD_DEVICE
-    uint off; // FD_INODE
+    uint_t off; // FD_INODE
     short major; // FD_DEVICE
 };
 
@@ -18,8 +18,8 @@ struct file {
 
 // in-memory copy of an inode
 struct inode {
-    uint dev; // Device number
-    uint inum; // Inode number
+    uint_t dev; // Device number
+    uint_t inum; // Inode number
     int ref; // Reference count
     struct sleeplock lock; // protects everything below here
     int valid; // inode has been read from disk?
@@ -28,14 +28,14 @@ struct inode {
     short major;
     short minor;
     short nlink;
-    uint size;
-    uint addrs[NDIRECT + 1];
+    uint_t size;
+    uint_t addrs[NDIRECT + 1];
 };
 
 // map major device number to device functions.
 struct devsw {
-    int (*read)(int, uint64, int);
-    int (*write)(int, uint64, int);
+    int (*read)(int, uint64_t, int);
+    int (*write)(int, uint64_t, int);
 };
 
 extern struct devsw devsw[];

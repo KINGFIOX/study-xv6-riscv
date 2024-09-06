@@ -17,7 +17,7 @@ printint(int fd, int xx, int base, int sgn)
 {
     char buf[16];
     int i, neg;
-    uint x;
+    uint_t x;
 
     neg = 0;
     if (sgn && xx < 0) {
@@ -38,13 +38,13 @@ printint(int fd, int xx, int base, int sgn)
         putc(fd, buf[i]);
 }
 
-static void printptr(int fd, uint64 x)
+static void printptr(int fd, uint64_t x)
 {
     int i;
     putc(fd, '0');
     putc(fd, 'x');
-    for (i = 0; i < (sizeof(uint64) * 2); i++, x <<= 4)
-        putc(fd, digits[x >> (sizeof(uint64) * 8 - 4)]);
+    for (i = 0; i < (sizeof(uint64_t) * 2); i++, x <<= 4)
+        putc(fd, digits[x >> (sizeof(uint64_t) * 8 - 4)]);
 }
 
 // Print to the given fd. Only understands %d, %x, %p, %s.
@@ -71,29 +71,29 @@ void vprintf(int fd, const char* fmt, va_list ap)
             if (c0 == 'd') {
                 printint(fd, va_arg(ap, int), 10, 1);
             } else if (c0 == 'l' && c1 == 'd') {
-                printint(fd, va_arg(ap, uint64), 10, 1);
+                printint(fd, va_arg(ap, uint64_t), 10, 1);
                 i += 1;
             } else if (c0 == 'l' && c1 == 'l' && c2 == 'd') {
-                printint(fd, va_arg(ap, uint64), 10, 1);
+                printint(fd, va_arg(ap, uint64_t), 10, 1);
                 i += 2;
             } else if (c0 == 'u') {
                 printint(fd, va_arg(ap, int), 10, 0);
             } else if (c0 == 'l' && c1 == 'u') {
-                printint(fd, va_arg(ap, uint64), 10, 0);
+                printint(fd, va_arg(ap, uint64_t), 10, 0);
                 i += 1;
             } else if (c0 == 'l' && c1 == 'l' && c2 == 'u') {
-                printint(fd, va_arg(ap, uint64), 10, 0);
+                printint(fd, va_arg(ap, uint64_t), 10, 0);
                 i += 2;
             } else if (c0 == 'x') {
                 printint(fd, va_arg(ap, int), 16, 0);
             } else if (c0 == 'l' && c1 == 'x') {
-                printint(fd, va_arg(ap, uint64), 16, 0);
+                printint(fd, va_arg(ap, uint64_t), 16, 0);
                 i += 1;
             } else if (c0 == 'l' && c1 == 'l' && c2 == 'x') {
-                printint(fd, va_arg(ap, uint64), 16, 0);
+                printint(fd, va_arg(ap, uint64_t), 16, 0);
                 i += 2;
             } else if (c0 == 'p') {
-                printptr(fd, va_arg(ap, uint64));
+                printptr(fd, va_arg(ap, uint64_t));
             } else if (c0 == 's') {
                 if ((s = va_arg(ap, char*)) == 0)
                     s = "(null)";
