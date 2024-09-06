@@ -13,7 +13,7 @@
 // and usertests <name> runs <name> test. The test runner creates for
 // each test a process and based on the exit status of the process,
 // the test runner reports "OK" or "FAILED".  Some tests result in
-// kernel printing usertrap messages, which can be ignored if test
+// kernel printing user_trap messages, which can be ignored if test
 // prints "OK".
 //
 

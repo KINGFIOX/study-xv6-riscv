@@ -17,7 +17,7 @@
 
         .section   trampsec
         .globl     trampoline
-        .globl     usertrap
+        .globl     user_trap
 trampoline:
         .align     4
         .globl     uservec
@@ -82,7 +82,7 @@ uservec:
 # make tp hold the current hartid, from p->trapframe->kernel_hartid
         ld         tp, 32(a0)
 
-# load the address of usertrap(), from p->trapframe->kernel_trap
+# load the address of user_trap(), from p->trapframe->kernel_trap
         ld         t0, 16(a0)
 
 # fetch the kernel page table address, from p->trapframe->kernel_satp.
@@ -98,7 +98,7 @@ uservec:
 # flush now-stale user entries from the TLB.
         sfence.vma zero, zero
 
-# jump to usertrap(), which does not return
+# jump to user_trap(), which does not return
         jr         t0
 
         .globl     userret

@@ -570,7 +570,7 @@ void wakeup(void* chan)
 
 // Kill the process with the given pid.
 // The victim won't exit until it tries to return
-// to user space (see usertrap() in trap.c).
+// to user space (see user_trap() in trap.c).
 int kill(int pid)
 {
     struct proc* p;

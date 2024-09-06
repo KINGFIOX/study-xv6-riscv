@@ -12,10 +12,12 @@ static int loadseg(pde_t*, uint64_t, struct inode*, uint_t, uint_t);
 int flags2perm(int flags)
 {
     int perm = 0;
-    if (flags & 0x1)
+    if (flags & 0x1) {
         perm = PTE_X;
-    if (flags & 0x2)
+    }
+    if (flags & 0x2) {
         perm |= PTE_W;
+    }
     return perm;
 }
 

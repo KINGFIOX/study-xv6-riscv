@@ -43,7 +43,7 @@ extern struct cpu cpus[NCPU];
 struct trap_frame {
     /*   0 */ uint64_t kernel_satp; // kernel page table
     /*   8 */ uint64_t kernel_sp; // top of process's kernel stack
-    /*  16 */ uint64_t kernel_trap; // usertrap()
+    /*  16 */ uint64_t kernel_trap; // user_trap()
     /*  24 */ uint64_t epc; // saved user program counter
     /*  32 */ uint64_t kernel_hartid; // saved kernel tp
     /*  40 */ uint64_t ra;

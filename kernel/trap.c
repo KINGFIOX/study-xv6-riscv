@@ -31,12 +31,12 @@ void trapinithart(void)
 // handle an interrupt, exception, or system call from user space.
 // called from trampoline.S
 //
-void usertrap(void)
+void user_trap(void)
 {
     int which_dev = 0;
 
     if ((r_sstatus() & SSTATUS_SPP) != 0)
-        panic("usertrap: not from user mode");
+        panic("user_trap: not from user mode");
 
     // send interrupts and exceptions to kerneltrap(),
     // since we're now in the kernel.
@@ -65,7 +65,7 @@ void usertrap(void)
     } else if ((which_dev = devintr()) != 0) {
         // ok
     } else {
-        printf("usertrap(): unexpected scause 0x%lx pid=%d\n", r_scause(), p->pid);
+        printf("user_trap(): unexpected scause 0x%lx pid=%d\n", r_scause(), p->pid);
         printf("            sepc=0x%lx stval=0x%lx\n", r_sepc(), r_stval());
         setkilled(p);
     }
@@ -88,8 +88,8 @@ void usertrapret(void)
     struct proc* p = my_proc();
 
     // we're about to switch the destination of traps from
-    // kerneltrap() to usertrap(), so turn off interrupts until
-    // we're back in user space, where usertrap() is correct.
+    // kerneltrap() to user_trap(), so turn off interrupts until
+    // we're back in user space, where user_trap() is correct.
     intr_off();
 
     // send syscalls, interrupts, and exceptions to uservec in trampoline.S
@@ -100,7 +100,7 @@ void usertrapret(void)
     // the process next traps into the kernel.
     p->trap_frame->kernel_satp = r_satp(); // kernel page table
     p->trap_frame->kernel_sp = p->kstack + PGSIZE; // process's kernel stack
-    p->trap_frame->kernel_trap = (uint64_t)usertrap;
+    p->trap_frame->kernel_trap = (uint64_t)user_trap;
     p->trap_frame->kernel_hartid = r_tp(); // hartid for cpu_id()
 
     // set up the registers that trampoline.S's sret will use
