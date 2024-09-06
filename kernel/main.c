@@ -17,8 +17,8 @@ void main()
         printf("xv6 kernel is booting\n");
         printf("\n");
         k_init(); // physical page allocator
-        k_vm_init(); // create kernel page table
-        k_vm_init_hart(); // turn on paging
+        kvm_init(); // create kernel page table
+        kvm_init_hart(); // turn on paging
         proc_init(); // process table
         trapinit(); // trap vectors
         trapinithart(); // install kernel trap vector
@@ -36,7 +36,7 @@ void main()
             ;
         __sync_synchronize();
         printf("hart %d starting\n", cpu_id());
-        k_vm_init_hart(); // turn on paging
+        kvm_init_hart(); // turn on paging
         trapinithart(); // install kernel trap vector
         plicinithart(); // ask PLIC for device interrupts
     }

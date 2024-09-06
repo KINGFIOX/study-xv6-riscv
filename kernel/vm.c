@@ -54,14 +54,14 @@ pagetable_t k_vm_make(void)
 }
 
 // Initialize the one kernel_pagetable
-void k_vm_init(void)
+void kvm_init(void)
 {
     kernel_pagetable = k_vm_make();
 }
 
 // Switch h/w page table register to the kernel's page table,
 // and enable paging.
-void k_vm_init_hart()
+void kvm_init_hart()
 {
     // wait for any previous writes to the page table memory to finish.
     sfence_vma();

@@ -156,8 +156,8 @@ void uart_putc_sync(int);
 int uart_getc(void);
 
 // vm.c
-void k_vm_init(void);
-void k_vm_init_hart(void);
+void kvm_init(void);
+void kvm_init_hart(void);
 void k_vm_map(pagetable_t, uint64, uint64, uint64, int);
 int map_pages(pagetable_t, uint64, uint64, uint64, int);
 pagetable_t uvm_create(void);

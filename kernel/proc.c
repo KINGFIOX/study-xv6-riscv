@@ -50,11 +50,9 @@ void proc_map_stacks(pagetable_t kpgtbl)
 // initialize the proc table.
 void proc_init(void)
 {
-    struct proc* p;
-
     init_lock(&pid_lock, "next_pid");
     init_lock(&wait_lock, "wait_lock");
-    for (p = procs; p < &procs[NPROC]; p++) {
+    for (struct proc* p = procs; p < &procs[NPROC] /* 遍历数组 */; p++) {
         init_lock(&p->lock, "proc");
         p->state = UNUSED;
         p->kstack = KSTACK((int)(p - procs));

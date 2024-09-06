@@ -10,6 +10,8 @@
 # a page boundary.
 #
 
+# .S 表示高级汇编, 会先经过 C 预处理器, 可以使用一些宏之类的
+
 #include "riscv.h"
 #include "memlayout.h"
 
@@ -29,6 +31,7 @@ uservec:
 
 # save user a0 in sscratch so
 # a0 can be used to get at TRAPFRAME.
+# 将 a0 保存在了 sscratch 中
         csrw       sscratch, a0
 
 # each process has a separate p->trapframe memory area,
@@ -46,6 +49,7 @@ uservec:
         sd         t2, 88(a0)
         sd         s0, 96(a0)
         sd         s1, 104(a0)
+# 这里空了 sd a0, h112(a0)
         sd         a1, 120(a0)
         sd         a2, 128(a0)
         sd         a3, 136(a0)
@@ -69,8 +73,8 @@ uservec:
         sd         t6, 280(a0)
 
 # save the user a0 in p->trapframe->a0
-        csrr       t0, sscratch
-        sd         t0, 112(a0)
+        csrr       t0, sscratch  # 这里读出来的是原来的 a0
+        sd         t0, 112(a0)   #
 
 # initialize kernel stack pointer, from p->trapframe->kernel_sp
         ld         sp, 8(a0)
