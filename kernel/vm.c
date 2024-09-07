@@ -113,20 +113,18 @@ pte_t* walk(pagetable_t pagetable, uint64_t va, int alloc)
 // Can only be used to look up user pages.
 uint64_t walk_addr(pagetable_t pagetable, uint64_t va)
 {
-    pte_t* pte;
-    uint64_t pa;
-
-    if (va >= MAXVA)
+    if (va >= MAXVA) {
         return 0;
-
-    pte = walk(pagetable, va, 0);
-    if (pte == 0)
+    }
+    pte_t* pte = walk(pagetable, va, 0);
+    if (pte == 0) {
         return 0;
+    }
     if ((*pte & PTE_V) == 0)
         return 0;
     if ((*pte & PTE_U) == 0)
         return 0;
-    pa = PTE2PA(*pte);
+    uint64_t pa = PTE2PA(*pte);
     return pa;
 }
 
@@ -380,25 +378,26 @@ int copyout(pagetable_t pagetable, uint64_t dstva, char* src, uint64_t len)
 }
 
 // Copy from user to kernel.
-// Copy len bytes to dst from virtual address srcva in a given page table.
+// Copy len bytes to dst from virtual address src_va in a given page table.
 // Return 0 on success, -1 on error.
-int copyin(pagetable_t pagetable, char* dst, uint64_t srcva, uint64_t len)
+int copyin(pagetable_t pagetable, char* dst, uint64_t src_va, uint64_t len)
 {
-    uint64_t n, va0, pa0;
 
     while (len > 0) {
-        va0 = PGROUNDDOWN(srcva);
-        pa0 = walk_addr(pagetable, va0);
-        if (pa0 == 0)
+        uint64_t va0 = PGROUNDDOWN(src_va);
+        uint64_t pa0 = walk_addr(pagetable, va0);
+        if (pa0 == 0) {
             return -1;
-        n = PGSIZE - (srcva - va0);
-        if (n > len)
+        }
+        uint64_t n = PGSIZE - (src_va - va0);
+        if (n > len) {
             n = len;
-        memmove(dst, (void*)(pa0 + (srcva - va0)), n);
+        }
+        memmove(dst, (void*)(pa0 + (src_va - va0)), n);
 
         len -= n;
         dst += n;
-        srcva = va0 + PGSIZE;
+        src_va = va0 + PGSIZE;
     }
     return 0;
 }
@@ -407,7 +406,7 @@ int copyin(pagetable_t pagetable, char* dst, uint64_t srcva, uint64_t len)
 // Copy bytes to dst from virtual address srcva in a given page table,
 // until a '\0', or max.
 // Return 0 on success, -1 on error.
-int copyinstr(pagetable_t pagetable, char* dst, uint64_t srcva, uint64_t max)
+int copyin_str(pagetable_t pagetable, char* dst, uint64_t srcva, uint64_t max)
 {
     uint64_t n, va0, pa0;
     int got_null = 0;

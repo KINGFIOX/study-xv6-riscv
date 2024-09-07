@@ -10,7 +10,7 @@ uint64_t
 sys_exit(void)
 {
     int n;
-    argint(0, &n);
+    arg_int(0, &n);
     exit(n);
     return 0; // not reached
 }
@@ -31,7 +31,7 @@ uint64_t
 sys_wait(void)
 {
     uint64_t p;
-    argaddr(0, &p);
+    arg_addr(0, &p);
     return wait(p);
 }
 
@@ -41,7 +41,7 @@ sys_sbrk(void)
     uint64_t addr;
     int n;
 
-    argint(0, &n);
+    arg_int(0, &n);
     addr = my_proc()->sz;
     if (growproc(n) < 0)
         return -1;
@@ -54,19 +54,19 @@ sys_sleep(void)
     int n;
     uint_t ticks0;
 
-    argint(0, &n);
+    arg_int(0, &n);
     if (n < 0)
         n = 0;
-    acquire(&tickslock);
+    acquire(&ticks_lock);
     ticks0 = ticks;
     while (ticks - ticks0 < n) {
         if (killed(my_proc())) {
-            release(&tickslock);
+            release(&ticks_lock);
             return -1;
         }
-        sleep(&ticks, &tickslock);
+        sleep(&ticks, &ticks_lock);
     }
-    release(&tickslock);
+    release(&ticks_lock);
     return 0;
 }
 
@@ -75,7 +75,7 @@ sys_kill(void)
 {
     int pid;
 
-    argint(0, &pid);
+    arg_int(0, &pid);
     return kill(pid);
 }
 
@@ -86,8 +86,8 @@ sys_uptime(void)
 {
     uint_t xticks;
 
-    acquire(&tickslock);
+    acquire(&ticks_lock);
     xticks = ticks;
-    release(&tickslock);
+    release(&ticks_lock);
     return xticks;
 }

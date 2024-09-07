@@ -15,6 +15,7 @@
         devShell = pkgs.mkShell {
           buildInputs = with pkgs; [
             qemu
+            cling
             (with pkgsCross.riscv64-embedded; [
               buildPackages.gcc
               buildPackages.gdb

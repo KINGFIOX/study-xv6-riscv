@@ -24,7 +24,7 @@ argfd(int n, int* pfd, struct file** pf)
     int fd;
     struct file* f;
 
-    argint(n, &fd);
+    arg_int(n, &fd);
     if (fd < 0 || fd >= NOFILE || (f = my_proc()->ofile[fd]) == 0)
         return -1;
     if (pfd)
@@ -72,8 +72,8 @@ sys_read(void)
     int n;
     uint64_t p;
 
-    argaddr(1, &p);
-    argint(2, &n);
+    arg_addr(1, &p);
+    arg_int(2, &n);
     if (argfd(0, 0, &f) < 0)
         return -1;
     return fileread(f, p, n);
@@ -86,8 +86,8 @@ sys_write(void)
     int n;
     uint64_t p;
 
-    argaddr(1, &p);
-    argint(2, &n);
+    arg_addr(1, &p);
+    arg_int(2, &n);
     if (argfd(0, 0, &f) < 0)
         return -1;
 
@@ -113,7 +113,7 @@ sys_fstat(void)
     struct file* f;
     uint64_t st; // user pointer to struct stat
 
-    argaddr(1, &st);
+    arg_addr(1, &st);
     if (argfd(0, 0, &f) < 0)
         return -1;
     return filestat(f, st);
@@ -126,7 +126,7 @@ sys_link(void)
     char name[DIRSIZ], new[MAXPATH], old[MAXPATH];
     struct inode *dp, *ip;
 
-    if (argstr(0, old, MAXPATH) < 0 || argstr(1, new, MAXPATH) < 0)
+    if (arg_str(0, old, MAXPATH) < 0 || arg_str(1, new, MAXPATH) < 0)
         return -1;
 
     begin_op();
@@ -193,7 +193,7 @@ sys_unlink(void)
     char name[DIRSIZ], path[MAXPATH];
     uint_t off;
 
-    if (argstr(0, path, MAXPATH) < 0)
+    if (arg_str(0, path, MAXPATH) < 0)
         return -1;
 
     begin_op();
@@ -310,8 +310,8 @@ sys_open(void)
     struct inode* ip;
     int n;
 
-    argint(1, &omode);
-    if ((n = argstr(0, path, MAXPATH)) < 0)
+    arg_int(1, &omode);
+    if ((n = arg_str(0, path, MAXPATH)) < 0)
         return -1;
 
     begin_op();
@@ -377,7 +377,7 @@ sys_mkdir(void)
     struct inode* ip;
 
     begin_op();
-    if (argstr(0, path, MAXPATH) < 0 || (ip = create(path, T_DIR, 0, 0)) == 0) {
+    if (arg_str(0, path, MAXPATH) < 0 || (ip = create(path, T_DIR, 0, 0)) == 0) {
         end_op();
         return -1;
     }
@@ -394,9 +394,9 @@ sys_mknod(void)
     int major, minor;
 
     begin_op();
-    argint(1, &major);
-    argint(2, &minor);
-    if ((argstr(0, path, MAXPATH)) < 0 || (ip = create(path, T_DEVICE, major, minor)) == 0) {
+    arg_int(1, &major);
+    arg_int(2, &minor);
+    if ((arg_str(0, path, MAXPATH)) < 0 || (ip = create(path, T_DEVICE, major, minor)) == 0) {
         end_op();
         return -1;
     }
@@ -412,7 +412,7 @@ uint64_t sys_chdir(void)
     struct proc* p = my_proc();
 
     begin_op();
-    if (argstr(0, path, MAXPATH) < 0 || (ip = namei(path)) == 0) {
+    if (arg_str(0, path, MAXPATH) < 0 || (ip = namei(path)) == 0) {
         end_op();
         return -1;
     }
@@ -435,8 +435,8 @@ uint64_t sys_exec(void)
     int i;
     uint64_t uargv, uarg;
 
-    argaddr(1, &uargv);
-    if (argstr(0, path, MAXPATH) < 0) {
+    arg_addr(1, &uargv);
+    if (arg_str(0, path, MAXPATH) < 0) {
         return -1;
     }
     memset(argv, 0, sizeof(argv));
@@ -444,7 +444,7 @@ uint64_t sys_exec(void)
         if (i >= NELEM(argv)) {
             goto bad;
         }
-        if (fetchaddr(uargv + sizeof(uint64_t) * i, (uint64_t*)&uarg) < 0) {
+        if (fetch_addr(uargv + sizeof(uint64_t) * i, (uint64_t*)&uarg) < 0) {
             goto bad;
         }
         if (uarg == 0) {
@@ -454,7 +454,7 @@ uint64_t sys_exec(void)
         argv[i] = k_alloc();
         if (argv[i] == 0)
             goto bad;
-        if (fetchstr(uarg, argv[i], PGSIZE) < 0)
+        if (fetch_str(uarg, argv[i], PGSIZE) < 0)
             goto bad;
     }
 
@@ -479,7 +479,7 @@ sys_pipe(void)
     int fd0, fd1;
     struct proc* p = my_proc();
 
-    argaddr(0, &fdarray);
+    arg_addr(0, &fdarray);
     if (pipealloc(&rf, &wf) < 0)
         return -1;
     fd0 = -1;

@@ -137,7 +137,7 @@ void console_intr(int c)
 
     switch (c) {
     case C('P'): // Print process list.
-        procdump();
+        proc_dump();
         break;
     case C('U'): // Kill line.
         while (cons.e != cons.w && cons.buf[(cons.e - 1) % INPUT_BUF_SIZE] != '\n') {

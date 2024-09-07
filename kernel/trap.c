@@ -6,7 +6,7 @@
 #include "proc.h"
 #include "defs.h"
 
-struct spinlock tickslock;
+struct spinlock ticks_lock;
 uint_t ticks;
 
 extern char trampoline[], uservec[], userret[];
@@ -14,15 +14,15 @@ extern char trampoline[], uservec[], userret[];
 // in kernelvec.S, calls kerneltrap().
 void kernelvec();
 
-extern int devintr();
+extern int dev_intr();
 
-void trapinit(void)
+void trap_init(void)
 {
-    init_lock(&tickslock, "time");
+    init_lock(&ticks_lock, "time");
 }
 
 // set up to take exceptions and traps while in the kernel.
-void trapinithart(void)
+void trap_init_hart(void)
 {
     w_stvec((uint64_t)kernelvec);
 }
@@ -35,8 +35,9 @@ void user_trap(void)
 {
     int which_dev = 0;
 
-    if ((r_sstatus() & SSTATUS_SPP) != 0)
+    if ((r_sstatus() & SSTATUS_SPP) != 0) {
         panic("user_trap: not from user mode");
+    }
 
     // send interrupts and exceptions to kerneltrap(),
     // since we're now in the kernel.
@@ -62,7 +63,7 @@ void user_trap(void)
         intr_on();
 
         syscall();
-    } else if ((which_dev = devintr()) != 0) {
+    } else if ((which_dev = dev_intr()) != 0) {
         // ok
     } else {
         printf("user_trap(): unexpected scause 0x%lx pid=%d\n", r_scause(), p->pid);
@@ -134,12 +135,14 @@ void kerneltrap()
     uint64_t sstatus = r_sstatus();
     uint64_t scause = r_scause();
 
-    if ((sstatus & SSTATUS_SPP) == 0)
+    if ((sstatus & SSTATUS_SPP) == 0) {
         panic("kerneltrap: not from supervisor mode");
-    if (intr_get() != 0)
+    }
+    if (intr_get() != 0) {
         panic("kerneltrap: interrupts enabled");
+    }
 
-    if ((which_dev = devintr()) == 0) {
+    if ((which_dev = dev_intr()) == 0) {
         // interrupt or trap from an unknown source
         printf("scause=0x%lx sepc=0x%lx stval=0x%lx\n", scause, r_sepc(), r_stval());
         panic("kerneltrap");
@@ -155,13 +158,13 @@ void kerneltrap()
     w_sstatus(sstatus);
 }
 
-void clockintr()
+void clock_intr()
 {
     if (cpu_id() == 0) {
-        acquire(&tickslock);
+        acquire(&ticks_lock);
         ticks++;
         wakeup(&ticks);
-        release(&tickslock);
+        release(&ticks_lock);
     }
 
     // ask for the next timer interrupt. this also clears
@@ -175,12 +178,12 @@ void clockintr()
 // returns 2 if timer interrupt,
 // 1 if other device,
 // 0 if not recognized.
-int devintr()
+int dev_intr()
 {
     uint64_t scause = r_scause();
 
     if (scause == 0x8000000000000009L) {
-        // this is a supervisor external interrupt, via PLIC.
+        // this is a supervisor external interrupt, via PLIC.(platform level interrupt controller)
 
         // irq indicates which device interrupted.
         int irq = plic_claim();
@@ -202,7 +205,7 @@ int devintr()
         return 1;
     } else if (scause == 0x8000000000000005L) {
         // timer interrupt.
-        clockintr();
+        clock_intr();
         return 2;
     } else {
         return 0;

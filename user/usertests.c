@@ -2406,7 +2406,7 @@ void nowrite(char* s)
     exit(0);
 }
 
-// regression test. copyin(), copyout(), and copyinstr() used to cast
+// regression test. copyin(), copyout(), and copyin_str() used to cast
 // the virtual page address to uint, which (with certain wild system
 // call arguments) resulted in a kernel page faults.
 void* big = (void*)0xeaeb0b5b00002f5e;

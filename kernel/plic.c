@@ -8,14 +8,14 @@
 // the riscv Platform Level Interrupt Controller (PLIC).
 //
 
-void plicinit(void)
+void plic_init(void)
 {
     // set desired IRQ priorities non-zero (otherwise disabled).
     *(uint32_t*)(PLIC + UART0_IRQ * 4) = 1;
     *(uint32_t*)(PLIC + VIRTIO0_IRQ * 4) = 1;
 }
 
-void plicinithart(void)
+void plic_init_hart(void)
 {
     int hart = cpu_id();
 

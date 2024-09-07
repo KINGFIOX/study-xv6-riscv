@@ -105,7 +105,7 @@ void wakeup(void*);
 void yield(void);
 int either_copyout(int user_dst, uint64_t dst, void* src, uint64_t len);
 int either_copyin(void* dst, int user_src, uint64_t src, uint64_t len);
-void procdump(void);
+void proc_dump(void);
 
 // swtch.S
 void swtch(struct context*, struct context*);
@@ -134,18 +134,18 @@ int strncmp(const char*, const char*, uint_t);
 char* strncpy(char*, const char*, int);
 
 // syscall.c
-void argint(int, int*);
-int argstr(int, char*, int);
-void argaddr(int, uint64_t*);
-int fetchstr(uint64_t, char*, int);
-int fetchaddr(uint64_t, uint64_t*);
+void arg_int(int, int*);
+int arg_str(int, char*, int);
+void arg_addr(int, uint64_t*);
+int fetch_str(uint64_t, char*, int);
+int fetch_addr(uint64_t, uint64_t*);
 void syscall();
 
 // trap.c
 extern uint_t ticks;
-void trapinit(void);
-void trapinithart(void);
-extern struct spinlock tickslock;
+void trap_init(void);
+void trap_init_hart(void);
+extern struct spinlock ticks_lock;
 void usertrapret(void);
 
 // uart.c
@@ -172,11 +172,11 @@ pte_t* walk(pagetable_t, uint64_t, int);
 uint64_t walk_addr(pagetable_t, uint64_t);
 int copyout(pagetable_t, uint64_t, char*, uint64_t);
 int copyin(pagetable_t, char*, uint64_t, uint64_t);
-int copyinstr(pagetable_t, char*, uint64_t, uint64_t);
+int copyin_str(pagetable_t, char*, uint64_t, uint64_t);
 
 // plic.c
-void plicinit(void);
-void plicinithart(void);
+void plic_init(void);
+void plic_init_hart(void);
 int plic_claim(void);
 void plic_complete(int);
 

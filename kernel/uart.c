@@ -185,14 +185,15 @@ int uart_getc(void)
 
 // handle a uart interrupt, raised because input has
 // arrived, or the uart is ready for more output, or
-// both. called from devintr().
+// both. called from dev_intr().
 void uart_intr(void)
 {
     // read and process incoming characters.
     while (1) {
         int c = uart_getc();
-        if (c == -1)
+        if (c == -1) {
             break;
+        }
         console_intr(c);
     }
 
